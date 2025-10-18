@@ -2,18 +2,20 @@
 import fetch from 'node-fetch'
 
 const handler = async (m, { conn, text, command, usedPrefix}) => {
-  const apikey = "sylphy-e321"
+  const apikey = "sylphy-8238wss"
 
   if (!text) {
     return m.reply(`📌 *Uso correcto:*\n${usedPrefix + command} <URL de MediaFire>\n📍 *Ejemplo:* ${usedPrefix + command} https://www.mediafire.com/file/abc123/archivo.zip`)
 }
 
   if (!text.includes("mediafire.com")) {
-    return m.reply("❌ *La URL proporcionada no parece ser de MediaFire.*")
+    return m.reply("❌ Por favor, proporciona una URL válida de MediaFire.")
 }
 
+  const apiUrl = `https://api.sylphy.xyz/download/mediafire?url=${encodeURIComponent(text)}&apikey=${apikey}`
+
   try {
-    const res = await fetch(`https://api.sylphy.xyz/download/mediafire?url=${encodeURIComponent(text)}&apikey=${apikey}`)
+    const res = await fetch(apiUrl)
     const json = await res.json()
 
     if (!json.status ||!json.data ||!json.data.dl_url) {
@@ -22,24 +24,24 @@ const handler = async (m, { conn, text, command, usedPrefix}) => {
 
     const info = json.data
     const caption = `
-╭─📁 *MediaFire Downloader* 📁─╮
+╭─📁 *MediaFire Downloader* ─╮
 │
-│ 📌 *Nombre:* ${info.filename}
+│ 📄 *Archivo:* ${info.filename}
 │ 📦 *Tipo:* ${info.mimetype}
 │ 📥 *Descargando archivo...*
-╰──────────────────────────────╯
+╰────────────────────────────╯
 `
 
-    await conn.sendMessage(m.chat, { image: { url: info.image || "https://i.imgur.com/JP52fdP.png"}, caption}, { quoted: m})
+    await conn.sendMessage(m.chat, { text: caption}, { quoted: m})
     await conn.sendMessage(m.chat, {
       document: { url: info.dl_url},
-      mimetype: info.mimetype || 'application/octet-stream',
+      mimetype: info.mimetype,
       fileName: info.filename
 }, { quoted: m})
 
-} catch (e) {
-    console.error(e)
-    m.reply("⚠️ Error al descargar el archivo.")
+} catch (error) {
+    console.error("Error al conectar con la API:", error)
+    m.reply("⚠️ Ocurrió un error al intentar descargar el archivo.")
 }
 }
 
