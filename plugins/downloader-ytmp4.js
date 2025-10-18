@@ -1,91 +1,51 @@
-// Codigo Echo Por MediaHub..No Editar 
-import axios from 'axios';
 
-const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+import fetch from 'node-fetch'
 
-const formatSize = (bytes) => {
-  if (!bytes) return 'Desconocido';
-  const sizes = ['B', 'KB', 'MB', 'GB'];
-  const i = Math.floor(Math.log(bytes) / Math.log(1024));
-  return `${(bytes / Math.pow(1024, i)).toFixed(1)} ${sizes[i]}`;
-};
+const handler = async (m, { conn, text, command, usedPrefix}) => {
+  const apikey = "sylphy-8238wss"
 
-const formatDuration = (seconds) => {
-  if (!seconds) return 'Desconocido';
-  const mins = Math.floor(seconds / 60);
-  const secs = seconds % 60;
-  return `${mins}m ${secs}s`;
-};
+  if (!text) {
+    return m.reply(`📌 *Uso correcto:*\n${usedPrefix + command} <URL de YouTube>\n📍 *Ejemplo:* ${usedPrefix + command} https://youtube.com/watch?v=abc123`)
+}
 
-const fetchDownloadUrl = async (videoUrl) => {
-  const api = `https://apis-starlights-team.koyeb.app/starlight/youtube-mp4?url=${encodeURIComponent(videoUrl)}&format=360p`;
-  try {
-    const { data } = await axios.get(api, { timeout: 15000 });
-    if (!data?.dl_url) return null;
-
-    return {
-      title: data.title || "Sin título",
-      quality: data.quality || "360p",
-      thumbnail: data.thumbnail,
-      author: data.author || "Desconocido",
-      url: data.dl_url
-    };
-  } catch (error) {
-    console.error(`❌ Error en la API: ${error.message}`);
-    return null;
-  }
-};
-
-let handler = async (m, { conn, text }) => {
-  if (!text?.trim() || (!text.includes('youtube.com') && !text.includes('youtu.be'))) {
-    await conn.reply(m.chat, `
-╭───〔 *YTMP4* 〕───✦
-│ ⚠️ Debes ingresar un enlace válido de YouTube.
-│ Ejemplo: *.ytmp4 https://youtu.be/abc123*
-╰───────────────✦
-`, m);
-    return;
-  }
-
-  const msg = await conn.reply(m.chat, `
-╭───〔 *YTMP4* 〕───✦
-│ 🎬 Iniciando conversión de video...
-│ ⏳ Espera unos segundos por favor.
-╰──────────────────✦
-`, m);
-  await conn.sendMessage(m.chat, { react: { text: '⏱️', key: msg.key } });
+  if (!text.includes("youtube.com")) {
+    return m.reply("❌ Por favor, proporciona una URL válida de YouTube.")
+}
 
   try {
-    const info = await fetchDownloadUrl(text);
-    if (!info) throw new Error("No se pudo obtener el enlace de descarga.");
+    const res = await fetch(`https://api.sylphy.xyz/download/ytmp4?url=${encodeURIComponent(text)}&apikey=sylphy-8238wss`)
+    const json = await res.json()
 
-   
-    await conn.sendMessage(m.chat, { react: { text: '✅', key: msg.key } });
+    if (!json.status ||!json.res ||!json.res.url) {
+      return m.reply("❌ No se pudo obtener el video.")
+}
 
-    
-    const caption = `*💌 ${info.title}*\n> ⚖️ Peso: Desconocido\n> ⏱️ Duración: Desconocido\n> 🌎 URL: ${text}`;
+    const info = json.res
+    const caption = `
+╭─🎬 *YouTube MP4 Downloader* ─╮
+│
+│ 🎞️ *Título:* ${info.title || "Video"}
+│ 💽 *Formato:* ${info.format || "MP4"}
+│ 📦 *Tamaño:* ${info.filesize || "Desconocido"}
+│ 📥 *Descargando video...*
+╰────────────────────────────╯
+`
 
+    await conn.sendMessage(m.chat, { image: { url: info.thumbnail || ""}, caption}, { quoted: m})
     await conn.sendMessage(m.chat, {
-      video: { url: info.url },
+      video: { url: info.url},
       mimetype: 'video/mp4',
-      fileName: `${info.title}.mp4`,
-      caption: caption
-    }, { quoted: m });
+      fileName: `${info.title || "video"}.mp4`
+}, { quoted: m})
 
-  } catch (error) {
-    console.error("❌ Error general:", error);
-    await conn.sendMessage(m.chat, { react: { text: '🔴', key: msg.key } });
-    await conn.reply(m.chat, `
-╭───〔 *Error al procesar* 〕───✦
-│ ⚠️ ${error.message || "Ocurrió un error desconocido."}
-│ 🔁 Intenta nuevamente más tarde.
-╰─────────────────────✦
-`, m);
-  }
-};
+} catch (e) {
+    console.error(e)
+    m.reply("⚠️ Error al descargar el video.")
+}
+}
 
-handler.help = ['ytmp4 <url>'];
-handler.tags = ['descargas'];
-handler.command = /^ytmp4$/i;
+handler.help = ['ytmp4 <url>']
+handler.tags = ['video']
+handler.command = /^ytmp4$/i
 
-export default handler;
+export default handler
