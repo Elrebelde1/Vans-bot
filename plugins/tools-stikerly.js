@@ -3,11 +3,11 @@ import fetch from 'node-fetch'
 import { Sticker} from 'wa-sticker-formatter'
 
 let handler = async (m, { conn, text, command}) => {
-  const apikey = "sylphy-e321"
+  const apikey = "sylphy-8238wss"
   if (!text) return m.reply(`📌 Ejemplo:.${command} Messi`)
 
   try {
-    const searchRes = await fetch(`https://api.sylphy.xyz/stickerly/search?q=${encodeURIComponent(text)}&apikey=${apikey}`)
+    const searchRes = await fetch(`https://api.sylphy.xyz/stickerly/search?q=${encodeURIComponent(text)}&apikey=sylphy-8238wss`)
     const searchJson = await searchRes.json()
 
     if (!searchJson.status ||!Array.isArray(searchJson.res) || searchJson.res.length < 4) {
