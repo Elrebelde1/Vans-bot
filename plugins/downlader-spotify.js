@@ -1,58 +1,90 @@
-
 import fetch from 'node-fetch'
 
-const SYLPHY_API_KEY = 'sylphy-8238wss'
+const handler = async (m, { conn, text, command, usedPrefix}) => {
+  const apikey = "sylphy-8238wss"
 
-async function buscarCancion(nombre) {
-  const url = `https://api.sylphy.xyz/search/spotify?q=${encodeURIComponent(nombre)}&apikey=sylphy-8238wss `
-  const res = await fetch(url)
-  const json = await res.json()
-  if (!json.status ||!json.data || json.data.length === 0) throw new Error('No se encontraron resultados')
-  return json.data[0] // Devuelve el primer resultado
+  if (!text) {
+    return m.reply(`📌 *Uso correcto:*\n${usedPrefix + command} <nombre de canción o URL de Spotify>\n📍 *Ejemplo:* ${usedPrefix + command} lupit\n📍 *Ejemplo:* ${usedPrefix + command} https://open.spotify.com/track/...`)
 }
 
-async function descargarCancion(spotifyUrl) {
-  const url = `https://api.sylphy.xyz/download/spotify?url=${encodeURIComponent(spotifyUrl)}&apikey='sylphy-8238wss`
-  const res = await fetch(url)
-  const json = await res.json()
-  if (!json.status ||!json.data ||!json.data.dl_url) throw new Error('No se pudo descargar la canción')
-  return json.data
+  // Si es una URL directa de Spotify
+  if (text.includes("open.spotify.com/track")) {
+    try {
+      const res = await fetch(`https://api.sylphy.xyz/download/spotify?url=${encodeURIComponent(text)}&apikey=sylphy-8238wss`)
+      const json = await res.json()
+
+      if (!json.status ||!json.data ||!json.data.dl_url) {
+        return m.reply("❌ No se pudo descargar la canción.")
 }
 
-async function procesarSpotify(texto, conn, m) {
-  try {
-    const esUrl = texto.includes('open.spotify.com/track')
-    const track = esUrl? { url: texto}: await buscarCancion(texto)
-    const info = await descargarCancion(track.url)
-
-    const mensaje = `
-🎶 *Spotify Downloader*
-📌 *Título:* ${info.title}
-🎤 *Artista:* ${info.author || 'Desconocido'}
-⏱️ *Duración:* ${info.duration || 'N/A'}
-🔗 *Enlace:* ${track.url}
-📥 *Descargando audio...*
+      const info = json.data
+      const caption = `
+╭─🎶 *Spotify Downloader* 🎶─╮
+│
+│ 🎵 *Título:* ${info.title}
+│ 👤 *Autor:* ${info.author}
+│ ⏱️ *Duración:* ${info.duration}
+│ 📥 *Descargando audio...*
+╰────────────────────────────╯
 `
 
-    await conn.sendMessage(m.chat, { image: { url: info.image}, caption: mensaje}, { quoted: m})
+      await conn.sendMessage(m.chat, { image: { url: info.image}, caption}, { quoted: m})
+      await conn.sendMessage(m.chat, {
+        audio: { url: info.dl_url},
+        mimetype: 'audio/mp4',
+        fileName: `${info.title}.m4a`
+}, { quoted: m})
+
+} catch (e) {
+      console.error(e)
+      m.reply("⚠️ Error al descargar la canción.")
+}
+    return
+}
+
+  // Si es texto, buscar y descargar automáticamente el primer resultado
+  try {
+    const res = await fetch(`https://api.sylphy.xyz/search/spotify?q=${encodeURIComponent(text)}&apikey=sylphy-8238wss`)
+    const json = await res.json()
+
+    if (!json.status ||!Array.isArray(json.data) || json.data.length === 0) {
+      return m.reply("❌ No se encontraron canciones.")
+}
+
+    const track = json.data[0] // Primer resultado
+    const downloadRes = await fetch(`https://api.sylphy.xyz/download/spotify?url=${encodeURIComponent(track.url)}&apikey=sylphy-8238wss`)
+    const downloadJson = await downloadRes.json()
+
+    if (!downloadJson.status ||!downloadJson.data ||!downloadJson.data.dl_url) {
+      return m.reply("❌ No se pudo descargar el audio.")
+}
+
+    const info = downloadJson.data
+    const caption = `
+╭─🎶 *Spotify Downloader* 🎶─╮
+│
+│ 🎵 *Título:* ${info.title}
+│ 👤 *Autor:* ${info.author}
+│ ⏱️ *Duración:* ${info.duration}
+│ 🔗 *Enlace:* ${track.url}
+│ 📥 *Descargando audio...*
+╰────────────────────────────╯
+`
+
+    await conn.sendMessage(m.chat, { image: { url: info.image}, caption}, { quoted: m})
     await conn.sendMessage(m.chat, {
       audio: { url: info.dl_url},
       mimetype: 'audio/mp4',
       fileName: `${info.title}.m4a`
 }, { quoted: m})
 
-} catch (error) {
-    console.error(error)
-    m.reply(`❌ Error: ${error.message}`)
+} catch (e) {
+    console.error(e)
+    m.reply("⚠️ Error al buscar o descargar la canción.")
 }
 }
 
-const handler = async (m, { conn, text}) => {
-  if (!text) return m.reply('📌 Escribe el nombre de la canción o pega el enlace de Spotify.')
-  await procesarSpotify(text, conn, m)
-}
-
-handler.help = ['spotify <nombre o URL>']
+handler.help = ['spotify <texto o URL>']
 handler.tags = ['music']
 handler.command = /^spotify$/i
 
