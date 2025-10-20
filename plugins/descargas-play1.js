@@ -1,82 +1,96 @@
 
-import yts from "yt-search";
-import fetch from "node-fetch";
+import yts from "yt-search"
+import fetch from "node-fetch"
 
-const limit = 100;
+const limit = 100 // MB
 
 const handler = async (m, { conn, text, command}) => {
   if (!text ||!text.trim()) {
-    return m.reply("🔎 *Por favor ingresa el nombre de un video o una URL de YouTube.*");
+    return m.reply(`🔎 *Uso correcto:*\n.play <nombre o URL de YouTube>\n📍 Ejemplo:.play Rojo 27\n📍 Ejemplo:.play https://youtu.be/yQC7Jfxz9cY`)
 }
 
-  await m.react("🎶");
+  await m.react("🎶")
 
   try {
-    const res = await yts(text.trim());
-    if (!res ||!res.all || res.all.length === 0) {
-      return m.reply("❌ *No se encontraron resultados para tu búsqueda.*");
+    // Si es URL directa
+    const isUrl = text.includes("youtube.com") || text.includes("youtu.be")
+    const videoUrl = isUrl? text.trim(): null
+
+    // Buscar si es texto
+    let video
+    if (!videoUrl) {
+      const res = await yts(text.trim())
+      if (!res ||!res.all || res.all.length === 0) {
+        return m.reply("❌ *No se encontraron resultados para tu búsqueda.*")
+}
+      video = res.all[0]
 }
 
-    const video = res.all[0];
+    const urlToUse = videoUrl || video.url
+    const title = video?.title || "Descarga de YouTube"
+    const author = video?.author?.name || "Desconocido"
+    const duration = video?.duration?.timestamp || "No disponible"
+    const views = video?.views? video.views.toLocaleString(): "N/A"
+    const thumbnail = video?.thumbnail || "https://i.imgur.com/JP52fdP.jpg"
+
     const caption = `
 ╭─[ *Sasuke YouTube* ]─╮
 │
-│ 📌 *Título:* ${video.title}
-│ 👤 *Autor:* ${video.author.name}
-│ ⏱️ *Duración:* ${video.duration.timestamp}
-│ 👁️ *Vistas:* ${video.views.toLocaleString()}
-│ 🔗 *Enlace:* ${video.url}
+│ 📌 *Título:* ${title}
+│ 👤 *Autor:* ${author}
+│ ⏱️ *Duración:* ${duration}
+│ 👁️ *Vistas:* ${views}
+│ 🔗 *Enlace:* ${urlToUse}
 ╰──────────────────╯
 
 📥 *Procesando tu descarga...*
-`;
+`
 
-    const thumbnailRes = await fetch(video.thumbnail);
-    const thumbnail = await thumbnailRes.buffer();
-    await conn.sendFile(m.chat, thumbnail, "thumb.jpg", caption, m);
+    const thumbRes = await fetch(thumbnail)
+    const thumbBuffer = await thumbRes.buffer()
+    await conn.sendFile(m.chat, thumbBuffer, "thumb.jpg", caption, m)
 
     if (command === "play") {
-      const apiRes = await fetch(`https://api.sylphy.xyz/download/ytmp3v2?url=${encodeURIComponent(video.url)}&apikey=sylphy-8238wss`);
-      const api = await apiRes.json();
-      const dl = api.dl_url || (api.data? api.data.dl_url: null);
+      const apiRes = await fetch(`https://api.sylphy.xyz/download/ytmp3?url=${encodeURIComponent(urlToUse)}&apikey=sylphy-8238wss`)
+      const json = await apiRes.json()
+      const dl = json?.res?.url || json?.dl_url
 
-      if (!dl) return m.reply("❌ *No se pudo obtener el audio.*");
+      if (!dl) return m.reply("❌ *No se pudo obtener el audio.*")
 
-      await conn.sendFile(m.chat, dl, `${video.title}.mp3`, "", m, null, {
+      await conn.sendFile(m.chat, dl, `${title}.mp3`, "", m, null, {
         mimetype: "audio/mpeg",
         ptt: false
-});
-      await m.react("✅");
+})
+      await m.react("✅")
+}
 
-} else if (command === "play2" || command === "playvid") {
-      const apiRes = await fetch(`https://api.sylphy.xyz/download/ytmp4?url=${encodeURIComponent(video.url)}&apikey=sylphy-8238wss`);
-      const api = await apiRes.json();
-      const dl = api.dl_url || (api.res? api.res.url: null);
+    if (command === "play2" || command === "playvid") {
+      const apiRes = await fetch(`https://api.sylphy.xyz/download/ytmp4?url=${encodeURIComponent(urlToUse)}&apikey=sylphy-8238wss`)
+      const json = await apiRes.json()
+      const dl = json?.res?.url || json?.dl_url
 
-      if (!dl) return m.reply("❌ *No se pudo obtener el video.*");
+      if (!dl) return m.reply("❌ *No se pudo obtener el video.*")
 
-      const fileRes = await fetch(dl);
-      const contentLength = fileRes.headers.get("Content-Length");
-      const bytes = parseInt(contentLength || 0, 10);
-      const sizeMB = bytes / (1024 * 1024);
-      const sendAsDoc = sizeMB>= limit;
+      const fileRes = await fetch(dl)
+      const sizeMB = parseInt(fileRes.headers.get("Content-Length") || 0) / (1024 * 1024)
+      const sendAsDoc = sizeMB>= limit
 
-      await conn.sendFile(m.chat, dl, `${video.title}.mp4`, "", m, null, {
+      await conn.sendFile(m.chat, dl, `${title}.mp4`, "", m, null, {
         asDocument: sendAsDoc,
         mimetype: "video/mp4"
-});
+})
 
-      await m.react("📽️");
+      await m.react("📽️")
 }
 
 } catch (error) {
-    console.error("❌ Error:", error);
-    return m.reply("⚠️ *Ocurrió un error al procesar tu solicitud.*");
+    console.error("❌ Error:", error)
+    m.reply("⚠️ *Ocurrió un error al procesar tu solicitud.*")
 }
-};
+}
 
-handler.help = ["play", "play2", "playvid"];
-handler.tags = ["descargas", "youtube"];
-handler.command = ["play", "play2", "playvid"];
+handler.help = ["play <texto o URL>", "play2", "playvid"]
+handler.tags = ["descargas", "youtube"]
+handler.command = ["play", "play2", "playvid"]
 
-export default handler;
+export default handler
