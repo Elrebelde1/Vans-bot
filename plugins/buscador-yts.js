@@ -1,6 +1,6 @@
 
 const ytSearchHandler = async (m, { conn, text, usedPrefix, command}) => {
-  const apikey = "sylphy-8238wss"; // Reemplaza esto con tu clave válida
+  const apikey = "sylphy-8238wss"; // Usa tu clave válida aquí
 
   if (!text ||!text.trim()) {
     await conn.reply(
@@ -15,14 +15,20 @@ const ytSearchHandler = async (m, { conn, text, usedPrefix, command}) => {
   await conn.reply(m.chat, `🔎 Buscando en YouTube por: *${query}*`, m);
 
   try {
-    const res = await fetch(`https://api.sylphy.xyz/search/youtube?q=${encodeURIComponent(query)}&apike=sylphy-8238wss`);
+    const url = `https://api.sylphy.xyz/search/youtube?q=${encodeURIComponent(query)}&apike=${apikey}`;
+    const res = await fetch(url);
+
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+}
+
     const json = await res.json();
 
     if (!json.status ||!json.res || json.res.length === 0) {
       return m.reply("❌ No se encontraron resultados.");
 }
 
-    const videos = json.res.slice(0, 5); // Primeros 5 resultados
+    const videos = json.res.slice(0, 5);
 
     for (const video of videos) {
       const caption = `
