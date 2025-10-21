@@ -1,51 +1,42 @@
 
-import fetch from 'node-fetch'
+import fetch from "node-fetch";
 
-const handler = async (m, { conn, text, command, usedPrefix}) => {
-  const apikey = "sylphy-8238wss"
+let handler = async (m, { conn, text, usedPrefix, command}) => {
+  const apikey = "sylphy-8238wss";
 
-  if (!text) {
-    return m.reply(`📌 *Uso correcto:*\n${usedPrefix + command} <URL de YouTube>\n📍 *Ejemplo:* ${usedPrefix + command} https://youtube.com/watch?v=abc123`)
+  if (!text ||!text.includes("youtube.com") &&!text.includes("youtu.be")) {
+    return m.reply(`📌 *Uso correcto:*\n${usedPrefix + command} <enlace de YouTube>\n📍 *Ejemplo:* ${usedPrefix + command} https://youtu.be/g5nG15iTPT8`);
 }
-
-  if (!text.includes("youtube.com")) {
-    return m.reply("❌ Por favor, proporciona una URL válida de YouTube.")
-}
-
-  const apiUrl = `https://api.sylphy.xyz/download/ytmp4?url=${encodeURIComponent(text)}&apikey=sylphy-8238wss`
 
   try {
-    const res = await fetch(apiUrl)
-    const json = await res.json()
+    const url = `https://api.sylphy.xyz/download/ytmp4?url=${encodeURIComponent(text)}&apikey=${apikey}`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`Error ${res.status}: ${res.statusText}`);
 
+    const json = await res.json();
     if (!json.status ||!json.res ||!json.res.url) {
-      return m.reply("❌ No se pudo obtener el video.")
+      return m.reply("❌ No se pudo obtener el video. Verifica el enlace o intenta con otro.");
 }
 
-    const info = json.res
-    const caption = `
-╭─🎬 *YouTube MP4 Downloader* ─╮
-│
-│ 🎞️ *Título:* ${info.title}
-│ 📥 *Descargando video...*
-╰────────────────────────────╯
-`
+    const { title, url: videoUrl} = json.res;
 
-    await conn.sendMessage(m.chat, { text: caption}, { quoted: m})
-    await conn.sendMessage(m.chat, {
-      video: { url: info.url},
-      mimetype: 'video/mp4',
-      fileName: `${info.title}.mp4`
-}, { quoted: m})
-
+    await conn.sendMessage(
+      m.chat,
+      {
+        video: { url: videoUrl},
+        caption: `🎬 *${title}*\n\n✅ Video descargado con éxito.`,
+        fileName: `${title}.mp4`
+},
+      { quoted: m}
+);
 } catch (error) {
-    console.error("Error al conectar con la API:", error)
-    m.reply("⚠️ Ocurrió un error al intentar descargar el video.")
+    console.error("❌ Error:", error);
+    await conn.reply(m.chat, `🚨 *Error:* ${error.message || "No se pudo procesar la solicitud."}`, m);
 }
-}
+};
 
-handler.help = ['ytmp4 <url>']
-handler.tags = ['video']
-handler.command = /^ytmp4$/i
+handler.help = ["ytmp4 <enlace>"];
+handler.tags = ["descargas"];
+handler.command = ["ytmp4"];
 
-export default handler
+export default handler;
