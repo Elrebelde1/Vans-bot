@@ -1,54 +1,42 @@
 
-import fetch from 'node-fetch'
+import fetch from "node-fetch";
 
-const handler = async (m, { conn, text, command, usedPrefix}) => {
-  const apikey = "sylphy-8238wss"
+let handler = async (m, { conn, text, usedPrefix, command}) => {
+  const apikey = "sylphy-8238wss";
 
-  if (!text) {
-    return m.reply(`📌 *Uso correcto:*\n${usedPrefix + command} <URL de YouTube>\n📍 *Ejemplo:* ${usedPrefix + command} https://youtu.be/yQC7Jfxz9cY`)
+  if (!text ||!text.includes("youtube.com") &&!text.includes("youtu.be")) {
+    return m.reply(`📌 *Uso correcto:*\n${usedPrefix + command} <enlace de YouTube>\n📍 *Ejemplo:* ${usedPrefix + command} https://youtu.be/g5nG15iTPT8`);
 }
-
-  if (!text.includes("youtube.com") &&!text.includes("youtu.be")) {
-    return m.reply("❌ Por favor, proporciona una URL válida de YouTube.")
-}
-
-  const apiUrl = `https://api.sylphy.xyz/download/ytmp3?url=${encodeURIComponent(text)}&apikey=${apikey}`
 
   try {
-    const res = await fetch(apiUrl)
-    const json = await res.json()
+    const url = `https://api.sylphy.xyz/download/ytmp3v2?url=${encodeURIComponent(text)}&apikey=${apikey}`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`Error ${res.status}: ${res.statusText}`);
 
-    const dl = json?.res?.url
-    const title = json?.res?.title || "Audio de YouTube"
-
-    if (!dl) {
-      return m.reply("❌ No se pudo obtener el audio.")
+    const json = await res.json();
+    if (!json.status ||!json.data ||!json.data.dl_url) {
+      return m.reply("❌ No se pudo obtener el audio. Verifica el enlace o intenta con otro video.");
 }
 
-    const caption = `
-╭─🎧 *YouTube MP3 Downloader* ─╮
-│
-│ 🎵 *Título:* ${title}
-│ 📥 *Descargando audio...*
-╰────────────────────────────╯
-`
+    const { title, dl_url, format} = json.data;
 
-    await conn.sendMessage(m.chat, { text: caption}, { quoted: m})
-    await conn.sendMessage(m.chat, {
-      audio: { url: dl},
-      mimetype: 'audio/mpeg',
-      fileName: `${title}.mp3`,
-      ptt: false
-}, { quoted: m})
-
+    await conn.sendMessage(
+      m.chat,
+      {
+        audio: { url: dl_url},
+        mimetype: 'audio/mpeg',
+        fileName: `${title}.${format}`
+},
+      { quoted: m}
+);
 } catch (error) {
-    console.error("❌ Error al conectar con la API:", error)
-    m.reply("⚠️ Ocurrió un error al intentar descargar el audio.")
+    console.error("❌ Error:", error);
+    await conn.reply(m.chat, `🚨 *Error:* ${error.message || "No se pudo procesar la solicitud."}`, m);
 }
-}
+};
 
-handler.help = ['ytmp3 <url>']
-handler.tags = ['audio']
-handler.command = /^ytmp3$/i
+handler.help = ["ytmp3 <enlace>"];
+handler.tags = ["descargas"];
+handler.command = ["ytmp3"];
 
-export default handler
+export default handler;
