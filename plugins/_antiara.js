@@ -11,7 +11,7 @@ let handler = async (m, { text, usedPrefix, command}) => {
   await m.react("🎵");
 
   try {
-    const url = `https://api.sylphy.xyz/tools/lyrics?q=${encodeURIComponent(text.trim())}&apikey=${apikey}`;
+    const url = `https://api.sylphy.xyz/tools/lyrics?q=${encodeURIComponent(text.trim())}&apikey=sylphy-8238wss`;
     const res = await fetch(url);
     const json = await res.json();
 
