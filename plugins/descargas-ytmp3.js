@@ -1,49 +1,41 @@
 
-import fetch from "node-fetch";
+var handler = async (m, { conn, args, usedPrefix, command}) => {
+  const emoji = '🎧';
+  const emoji2 = '⚠️';
 
-let handler = async (m, { conn, text, usedPrefix, command}) => {
-  const apikey = "sylphy-8238wss";
-
-  if (!text || (!text.includes("youtube.com") &&!text.includes("youtu.be"))) {
-    return m.reply(`📌 *Uso correcto:*\n${usedPrefix + command} <enlace de YouTube>\n📍 *Ejemplo:* ${usedPrefix + command} https://youtu.be/zYwGL6qOON4`);
+  if (!args[0]) {
+    return conn.reply(m.chat, `${emoji2} Debes proporcionar un enlace de YouTube.\n\nEjemplo:\n*${usedPrefix}${command} https://youtu.be/zYwGL6qOON4*`, m);
 }
 
-  await m.react("⏳"); // Reacción inicial
+  const videoUrl = encodeURIComponent(args[0].trim());
+  const apiKey = 'sylphy-8238wss';
+  const apiUrl = `https://api.sylphy.xyz/download/ytmp3v2?url=${videoUrl}&apikey=${apiKey}`;
 
   try {
-    const baseUrl = "https://api.sylphy.xyz/download/ytmp3v2";
-    const videoUrl = encodeURIComponent(text.trim());
-    const apiUrl = `${baseUrl}?url=${videoUrl}&apikey=${apikey}`;
-
     const res = await fetch(apiUrl);
-    if (!res.ok) throw new Error(`Error ${res.status}: ${res.statusText}`);
-
     const json = await res.json();
+
     if (!json.status ||!json.data ||!json.data.dl_url) {
-      return m.reply("❌ No se pudo obtener el audio. Verifica el enlace o intenta con otro video.");
+      return conn.reply(m.chat, `${emoji2} No se pudo obtener el audio. Verifica que el enlace sea válido.`, m);
 }
 
     const { title, dl_url, format} = json.data;
 
-    await conn.sendMessage(
-      m.chat,
-      {
-        audio: { url: dl_url},
-        mimetype: 'audio/mpeg',
-        fileName: `${title}.${format}`
-},
-      { quoted: m}
-);
+    let info = `${emoji} *Audio extraído de YouTube:*\n`;
+    info += `🎵 *Título:* ${title}\n`;
+    info += `📁 *Formato:* ${format.toUpperCase()}\n`;
+    info += `📥 *Descargando...*`;
 
-    await m.react("🟢"); // Reacción final al completar
-} catch (error) {
-    console.error("❌ Error:", error);
-    await conn.reply(m.chat, `🚨 *Error:* ${error.message || "No se pudo procesar la solicitud."}`, m);
+    await conn.sendFile(m.chat, dl_url, `${title}.${format}`, info, m);
+} catch (e) {
+    console.error(e);
+    return conn.reply(m.chat, `${emoji2} Ocurrió un error al procesar el enlace. Intenta nuevamente más tarde.`, m);
 }
 };
 
-handler.help = ["ytmp3 <enlace>"];
-handler.tags = ["descargas"];
-handler.command = ["ytmp3"];
+handler.help = ['ytmp3 <enlace>'];
+handler.tags = ['descargas'];
+handler.command = ['ytmp3', 'mp3'];
+handler.group = false;
 
 export default handler;
