@@ -42,7 +42,7 @@ let handler = async (m, { conn, text, usedPrefix, command}) => {
 }
 };
 
-handler.help = ["apk <nombre de la app>"];
+handler.help = ["apk3 <nombre de la app>"];
 handler.tags = ["descargas"];
 handler.command = ["apk3"];
 
