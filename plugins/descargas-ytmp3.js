@@ -4,15 +4,18 @@ import fetch from "node-fetch";
 let handler = async (m, { conn, text, usedPrefix, command}) => {
   const apikey = "sylphy-8238wss";
 
-  if (!text ||!text.includes("youtube.com") &&!text.includes("youtu.be")) {
-    return m.reply(`📌 *Uso correcto:*\n${usedPrefix + command} <enlace de YouTube>\n📍 *Ejemplo:* ${usedPrefix + command} https://youtu.be/g5nG15iTPT8`);
+  if (!text || (!text.includes("youtube.com") &&!text.includes("youtu.be"))) {
+    return m.reply(`📌 *Uso correcto:*\n${usedPrefix + command} <enlace de YouTube>\n📍 *Ejemplo:* ${usedPrefix + command} https://youtu.be/zYwGL6qOON4`);
 }
 
   await m.react("⏳"); // Reacción inicial
 
   try {
-    const url = `https://api.sylphy.xyz/download/ytmp3v2?url=${encodeURIComponent(text)}&apikey=sylphy-8238wss`;
-    const res = await fetch(url);
+    const baseUrl = "https://api.sylphy.xyz/download/ytmp3v2";
+    const videoUrl = encodeURIComponent(text.trim());
+    const apiUrl = `${baseUrl}?url=${videoUrl}&apikey=${apikey}`;
+
+    const res = await fetch(apiUrl);
     if (!res.ok) throw new Error(`Error ${res.status}: ${res.statusText}`);
 
     const json = await res.json();
