@@ -14,15 +14,17 @@ let handler = async (m, { text, command}) => {
     const res = await fetch(url);
     const buffer = await res.buffer();
 
-    await conn.sendFile(m.chat, buffer, 'imagen.jpg', `🖼️ *Imagen generada con el prompt:*\n"${prompt}"`, m);
+    await conn.sendFile(m.chat, buffer, 'imagen.jpg', `🖼️ *Imagen generada con el prompt:*\n"${prompt}"`, m, null, {
+      asSticker: false
+});
 } catch (e) {
     console.error("Error en.img:", e);
     m.reply("⚠️ Ocurrió un error al generar la imagen.");
 }
 };
 
-handler.help = ['crearimg <descripción>'];
-handler.tags = ['ai', 'img'];
+handler.help = ['img <descripción>'];
+handler.tags = ['ai', 'imagen'];
 handler.command = ['img', 'crearimg'];
 
 export default handler;
