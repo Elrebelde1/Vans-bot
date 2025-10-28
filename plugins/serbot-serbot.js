@@ -56,7 +56,7 @@ como *Sub-Bot Temporal* en esta sesión.
 ⚠ Si ya estás conectado en otra sesión,
 se recomienda cerrarla para evitar errores o bloqueos.
 `;
-let imagenUrl = 'https://n.uguu.se/WNQzvwAp.jpg';
+let imagenUrl = 'https://qu.ax/sFJlT.jpg';
 
 let emoji2 = '🍁';
 
