@@ -1,35 +1,6 @@
-
 import fetch from 'node-fetch';
 
-const tiktokSessions = {}; // Almacena sesiones por usuario
-
 const handler = async (m, { conn, text, command}) => {
-  const sender = m.sender;
-
-  if (tiktokSessions[sender]) {
-    const choice = m.text.trim().replace(/[^0-9]/g, ''); // Extrae solo el número
-
-    if (choice === '1') {
-      await conn.sendMessage(m.chat, {
-        video: { url: tiktokSessions[sender].normal},
-        caption: `✅ *Aquí tienes tu video normal:* ${tiktokSessions[sender].title}`
-}, { quoted: m});
-      delete tiktokSessions[sender];
-      return;
-}
-
-    if (choice === '2') {
-      await conn.sendMessage(m.chat, {
-        video: { url: tiktokSessions[sender].hd},
-        caption: `✅ *Aquí tienes tu video HD:* ${tiktokSessions[sender].title}`
-}, { quoted: m});
-      delete tiktokSessions[sender];
-      return;
-}
-
-    return m.reply('❌ Opción inválida. Responde con 1 para video normal o 2 para video HD.');
-}
-
   if (!text) {
     return conn.reply(m.chat, '❌ ¡Necesito un enlace de TikTok! Por favor, proporciona uno después del comando.', m);
 }
@@ -45,41 +16,37 @@ const handler = async (m, { conn, text, command}) => {
 
     if (!result || result.code!== 0 ||!result.data ||!result.data.play) {
       let errorMessage = '❌ No pude descargar el video. Asegúrate de que el enlace sea correcto, público y esté disponible.';
-      if (result && result.msg) errorMessage += `\nDetalles: ${result.msg}`;
+      if (result && result.msg) {
+        errorMessage += `\nDetalles: ${result.msg}`;
+}
       return conn.reply(m.chat, errorMessage, m);
+}
+
+    // Usar el enlace sin marca de agua si está disponible
+    const videoUrlNoWatermark = result.data.play;
+
+    if (!videoUrlNoWatermark) {
+      return conn.reply(m.chat, '❌ No se encontró una URL de video sin marca de agua.', m);
 }
 
     const author = result.data.author?.nickname || 'Desconocido';
     const description = result.data.title || 'Sin descripción';
     const duration = result.data.duration? formatDuration(result.data.duration): 'N/A';
-    const sizeNormal = result.data.size? `${(result.data.size / (1024 * 1024)).toFixed(2)} MB`: 'N/A';
-    const sizeHD = result.data.size_hd? `${(result.data.size_hd / (1024 * 1024)).toFixed(2)} MB`: 'N/A';
+    const size = result.data.size? `${(result.data.size / (1024 * 1024)).toFixed(2)} MB`: 'N/A';
 
     const caption = `
-🎬 *Vista previa del TikTok:*
+✅ *TikTok descargado sin marca de agua:*
 
 👤 *Autor:* ${author}
 📝 *Descripción:* ${description}
 ⏳ *Duración:* ${duration}
-
-📥 ¿Cómo deseas descargarlo?
-1️⃣ Video Normal (${sizeNormal})
-2️⃣ Video HD (${sizeHD})
-
-*Responde con:* 1 o 2
+📏 *Tamaño:* ${size}
 `;
 
     await conn.sendMessage(m.chat, {
-      video: { url: result.data.play},
-      caption
+      video: { url: videoUrlNoWatermark},
+      caption: caption,
 }, { quoted: m});
-
-    // Guardar sesión
-    tiktokSessions[sender] = {
-      normal: result.data.play,
-      hd: result.data.play_hd,
-      title: description
-};
 
 } catch (error) {
     console.error('Error al descargar TikTok:', error);
@@ -87,12 +54,12 @@ const handler = async (m, { conn, text, command}) => {
 }
 };
 
-handler.command = /^(tiktok|tt)$/i;
-
-export default handler;
-
 function formatDuration(seconds) {
   const minutes = Math.floor(seconds / 60);
   const remainingSeconds = seconds % 60;
   return `${minutes}:${remainingSeconds < 10? '0': ''}${remainingSeconds}`;
 }
+
+handler.command = /^(tiktok|tt)$/i;
+
+export default handler;
