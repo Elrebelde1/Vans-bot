@@ -50,18 +50,18 @@ const handler = async (m, { conn, text, command}) => {
     const apiRes = await fetch(`https://api.starlights.uk/api/downloader/youtube?url=${encodeURIComponent(urlToUse)}`);
     const json = await apiRes.json();
 
-    if (!json.status) return m.reply("❌ *No se pudo obtener la descarga.*");
+    if (!json ||!json.status || (!json.mp3?.dl_url &&!json.mp4?.dl_url)) {
+      return m.reply("⚠️ *La API respondió pero no incluyó enlaces de descarga.*");
+}
 
     if (command === "play") {
       const dl = json.mp3?.dl_url;
-      const format = "mp3";
-
       if (!dl) return m.reply("❌ *No se pudo obtener el audio.*");
 
       await conn.sendMessage(m.chat, {
         audio: { url: dl},
         mimetype: "audio/mpeg",
-        fileName: `${title}.${format}`
+        fileName: `${title}.mp3`
 }, { quoted: m});
 
       await m.react("✅");
@@ -69,7 +69,6 @@ const handler = async (m, { conn, text, command}) => {
 
     if (command === "play2" || command === "playvid") {
       const dl = json.mp4?.dl_url;
-
       if (!dl) return m.reply("❌ *No se pudo obtener el video.*");
 
       const fileRes = await fetch(dl);
