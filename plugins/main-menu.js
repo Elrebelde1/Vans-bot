@@ -9,24 +9,24 @@ const clockString = ms => {
   return [h, m, s].map(v => v.toString().padStart(2, '0')).join(':');
 };
 
-// Saludo dinámico según la hora
+// Saludo dinámico según la hora con toque navideño
 const saludarSegunHora = () => {
   const hora = new Date().getHours();
-  if (hora>= 5 && hora < 12) return '🌄 Buenos días';
-  if (hora>= 12 && hora < 19) return '🌞 Buenas tardes';
-  return '🌙 Buenas noches';
+  if (hora>= 5 && hora < 12) return '🎄 ¡Feliz Mañana Navideña!';
+  if (hora>= 12 && hora < 19) return '🎅 ¡Disfruta esta Tarde Festiva!';
+  return '🌟 ¡Buenas Noches de Paz!';
 };
 
 // Imagen de respaldo
 const img = 'https://qu.ax/yxwAs.jpg';
 const sectionDivider = '╰━━━━━━━━━━━━━━━━━━⭓';
 
-// Pie de menú
+// Pie de menú con mensaje navideño
 const menuFooter = `
-╭─❒ 「📌 INFO FINAL」
-│ ⚠️ Usa los comandos con el prefijo correspondiente
-│ 📌 Ejemplo:.ping |.menu
-│ 🛡️ Creado por Barboza-Team
+╭─❒ 「🎁 DESEOS Y COMANDOS」
+│ 🔔 Usa los comandos con el prefijo correspondiente
+│ 🕯️ Ejemplo:.ping |.menu
+│ ❄️ Creado por Barboza-Team - ¡Felices Fiestas!
 ╰❒
 `.trim();
 
@@ -42,20 +42,20 @@ const handler = async (m, { conn, usedPrefix}) => {
     const { exp, level, limit} = user;
     const { min, xp} = xpRange(level, global.multiplier || 1);
     const totalUsers = Object.keys(global.db.data.users).length;
-    const mode = global.opts?.self? 'Privado 🔒': 'Público 🌐';
+    const mode = global.opts?.self? 'Duende Personal 🧝': 'Trineo Abierto 🦌';
     const uptime = clockString(process.uptime() * 1000);
     const tagUsuario = `@${m.sender.split('@')[0]}`;
     const userName = (await conn.getName?.(m.sender)) || tagUsuario;
 
     const text = [
-      "*Etiqueta General X Sasuke*",
-      "𝙈𝙚𝙣𝙘𝙞𝙤𝙣 𝙂𝙚𝙣𝙚𝙧𝙖𝙡",
-      "𝙀𝙩𝙞𝙦𝙪𝙚𝙩𝙖𝙣𝙙𝙤 𝙖 𝙡𝙤𝙨 𝙉𝙋𝘾"
+      "Campanas de Sasuke",
+      "Villancico General",
+      "Regalos para los NPC"
     ].getRandom();
 
     const imgRandom = [
-      "https://iili.io/FKVDVAN.jpg",
-      "https://iili.io/FKVbUrJ.jpg"
+      "https://iili.io/FKVDVAN.jpg", // Puedes reemplazar con imágenes navideñas
+      "https://iili.io/FKVbUrJ.jpg" // Puedes reemplazar con imágenes navideñas
     ].getRandom();
 
     let thumbnailBuffer;
@@ -93,29 +93,30 @@ const handler = async (m, { conn, usedPrefix}) => {
         cmds.forEach(cmd => categorizedCommands[tag].add(usedPrefix + cmd));
 });
 
+    // Emojis de categoría con toque navideño
     const categoryEmojis = {
-      anime: '🎭', info: 'ℹ️', search: '🔎', diversión: '🎉', subbots: '🤖',
-      rpg: '🌀', registro: '📝', sticker: '🎨', imagen: '🖼️', logo: '🖌️',
-      premium: '🎖️', configuración: '⚙️', descargas: '📥', herramientas: '🛠️',
-      nsfw: '🔞', 'base de datos': '📀', audios: '🔊', freefire: '🔥', otros: '🪪'
+      anime: '🎭', info: 'ℹ️', search: '🔍', diversión: '🎁', subbots: '🤖',
+      rpg: '🦌', registro: '📝', sticker: '✨', imagen: '🖼️', logo: '🖍️',
+      premium: '👑', configuración: '⚙️', descargas: '📦', herramientas: '🛠️',
+      nsfw: '🚫', 'base de datos': '📀', audios: '🎵', freefire: '🔥', otros: '🎄'
 };
 
 const menuBody = Object.entries(categorizedCommands).map(([title, cmds]) => {
-      const emoji = categoryEmojis[title.toLowerCase()] || '📁';
+      const emoji = categoryEmojis[title.toLowerCase()] || '❄️';
       const list = [...cmds].map(cmd => `│ ◦ ${cmd}`).join('\n');
       return `╭─「 ${emoji} ${title.toUpperCase()} 」\n${list}\n${sectionDivider}`;
 }).join('\n\n');
 
     const header = `
-${saludo} ${tagUsuario} 👋
+${saludo} ${tagUsuario} 🎁
 
-╭─ 「 sᥲsᥙkᥱ ᑲ᥆𝗍 mძ 🌀 」
+╭─ 「 sᥲsᥙkᥱ ᑲ᥆𝗍 mძ 🎅 」
 │ 👤 Nombre: ${userName}
-│ 🎖 Nivel: ${level} | XP: ${exp - min}/${xp}
-│ 🔓 Límite: ${limit}
+│ 🌟 Nivel: ${level} | XP: ${exp - min}/${xp}
+│ 🔑 Pases de Regalo: ${limit}
 │ 🧭 Modo: ${mode}
 │ ⏱️ Tiempo activo: ${uptime}
-│ 🌍 Usuarios registrados: ${totalUsers}
+│ 🌍 Amigos de Navidad: ${totalUsers}
 ╰─❒
 `.trim();
 
@@ -132,7 +133,7 @@ ${saludo} ${tagUsuario} 👋
 
 } catch (e) {
     console.error('❌ Error al generar el menú: Barboza bug :', e);
-    await conn.reply(m.chat, `⚠️ Ocurrió un error al mostrar el menú.\n> ${e.message}`, m);
+    await conn.reply(m.chat, `⚠️ Ocurrió un error al mostrar el menú. ¡El Grinch atacó!\n> ${e.message}`, m);
 }
 };
 
