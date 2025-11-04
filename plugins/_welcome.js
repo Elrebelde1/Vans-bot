@@ -1,4 +1,3 @@
-
 import { WAMessageStubType} from '@whiskeysockets/baileys';
 import fetch from 'node-fetch';
 
@@ -8,6 +7,15 @@ export async function before(m, { conn, groupMetadata}) {
 
     const chat = global.db?.data?.chats?.[m.chat];
     if (!chat ||!chat.bienvenida) return true;
+
+    // --- Enlace de imagen predeterminado ---
+    const defaultImageUrl = 'https://qu.ax/yxwAs.jpg';
+    
+    // Función para obtener la imagen como buffer
+    const get_default_image_buffer = async () => {
+        return await fetch(defaultImageUrl).then(res => res.buffer());
+    };
+    // ----------------------------------------
 
     const fkontak = {
       key: {
@@ -45,22 +53,9 @@ export async function before(m, { conn, groupMetadata}) {
     const groupName = groupMetadata.subject;
     const groupDesc = groupMetadata.desc || '📜 Sin descripción disponible';
 
-    let imgBuffer;
-
-    if (m.messageStubType === WAMessageStubType.GROUP_PARTICIPANT_ADD) {
-      imgBuffer = await fetch(
-        'https://canvas-8zhi.onrender.com/api/welcome?title=Bienvenido&desc=al%20grupo%20Sasuke%20Bot&background=https://https://qu.ax/yxwAs.jpg'
-).then(res => res.buffer());
-}
-
-    if (
-      m.messageStubType === WAMessageStubType.GROUP_PARTICIPANT_LEAVE ||
-      m.messageStubType === WAMessageStubType.GROUP_PARTICIPANT_REMOVE
-) {
-      imgBuffer = await fetch(
-        'https://canvas-8zhi.onrender.com/api/welcome?title=Te%20extrañaremos%20pendejo%20🖕🏻😂&desc=&background=https://qu.ax/gcBQF.jpg'
-).then(res => res.buffer());
-}
+    // *** Obtener el buffer de la imagen predeterminada para todos los casos ***
+    const imgBuffer = await get_default_image_buffer();
+    // *************************************************************************
 
     const { customWelcome, customBye, customKick} = chat;
 
