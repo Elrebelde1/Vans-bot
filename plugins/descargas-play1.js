@@ -50,43 +50,68 @@ Ejemplo:.play https://youtu.be/yQC7Jfxz9cY`);
     const thumbBuffer = await await thumbRes.buffer();
     await conn.sendFile(m.chat, thumbBuffer, "thumb.jpg", caption, m);
 
+    // --- LÓGICA MP3 CON SYLPHY.XYZ (Comando: .play) ---
     if (command === "play") {
-      const apiRes = await fetch(`https://api.vreden.my.id/api/v1/download/youtube/audio?url=${encodeURIComponent(urlToUse)}&quality=128`);
-      const json = await apiRes.json();
-      const dl = json?.result?.download?.url;
-      const format = "mp3";
+        
+        // Realiza una solicitud POST a sylphy.xyz para MP3 (audio)
+        const apiRes = await fetch("https://sylphy.xyz/ytdl/mp3", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                url: urlToUse, // Usa la URL del video encontrado/proporcionado
+                apikey: "sylphy" // Clave de API de tu ejemplo
+            })
+        });
+        
+        const json = await apiRes.json();
+        // NOTA: Se asume que el enlace de descarga está en 'json.dl_link' o 'json.url'.
+        const dl = json?.dl_link || json?.url;
+        const format = "mp3";
 
-      if (!json?.result?.status ||!dl) return m.reply("❌ *El Elfo de Audio no encontró el villancico.*"); // Mensaje de error de audio festivo
+        if (!dl) return m.reply("❌ *El Elfo de Audio no encontró el villancico con sylphy.xyz. Revisa tu clave y la estructura de la respuesta de la API.*"); 
 
-      await conn.sendMessage(m.chat, {
-        audio: { url: dl},
-        mimetype: "audio/mpeg",
-        fileName: `${title}.${format}`
-}, { quoted: m});
+        await conn.sendMessage(m.chat, {
+            audio: { url: dl},
+            mimetype: "audio/mpeg",
+            fileName: `${title}.${format}`
+        }, { quoted: m});
 
-      await m.react("🎧"); // Emoji de éxito de audio festivo
-}
+        await m.react("🎧"); // Emoji de éxito de audio festivo
+    }
 
+    // --- LÓGICA MP4 CON SYLPHY.XYZ (Comandos: .play2 o .playvid) ---
     if (command === "play2" || command === "playvid") {
-      const apiRes = await fetch(`https://api.vreden.my.id/api/v1/download/play/video?query=${encodeURIComponent(text.trim())}`);
-      const json = await apiRes.json();
-      const dl = json?.result?.download?.url;
+        
+        // Realiza una solicitud POST a sylphy.xyz para MP4 (video)
+        const apiRes = await fetch("https://sylphy.xyz/ytdl/mp4", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                url: urlToUse, // Usa la URL del video encontrado/proporcionado
+                quality: "720", // Calidad de video de tu ejemplo
+                apikey: "sylphy" // Clave de API de tu ejemplo
+            })
+        });
+        
+        const json = await apiRes.json();
+        // NOTA: Se asume que el enlace de descarga está en 'json.dl_link' o 'json.url'.
+        const dl = json?.dl_link || json?.url;
 
-      if (!json?.result?.status ||!dl) return m.reply("❌ *El Trineo de Video falló al cargar la peli.*"); // Mensaje de error de video festivo
+        if (!dl) return m.reply("❌ *El Trineo de Video falló al cargar la peli con sylphy.xyz. Revisa tu clave y la estructura de la respuesta de la API.*");
 
-      const fileRes = await fetch(dl);
-      const sizeMB = parseInt(fileRes.headers.get("Content-Length") || 0) / (1024 * 1024);
-      const sendAsDoc = sizeMB>= limit;
+        const fileRes = await fetch(dl);
+        const sizeMB = parseInt(fileRes.headers.get("Content-Length") || 0) / (1024 * 1024);
+        const sendAsDoc = sizeMB>= limit; // Esta línea no se usa, pero la dejo por consistencia
 
-      await conn.sendMessage(m.chat, {
-        video: { url: dl},
-        mimetype: "video/mp4",
-        fileName: `${title}.mp4`,
-        caption: ""
-}, { quoted: m});
+        await conn.sendMessage(m.chat, {
+            video: { url: dl},
+            mimetype: "video/mp4",
+            fileName: `${title}.mp4`,
+            caption: ""
+        }, { quoted: m});
 
-      await m.react("🎅"); // Emoji de éxito de video festivo
-}
+        await m.react("🎅"); // Emoji de éxito de video festivo
+    }
 
 } catch (error) {
     console.error("❌ Error:", error);
