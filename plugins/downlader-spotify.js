@@ -1,39 +1,64 @@
-import axios from 'axios'
-import fetch from 'node-fetch'
 
-const handler = async (m, { conn, text, usedPrefix }) => {
-if (!text) return m.reply("❀ Por favor, proporciona el nombre de una canción o artista.")
-try {
-await m.react('🕒')
-const res = await axios.get(`${global.APIs.adonix.url}/download/spotify?apikey=${global.APIs.adonix.key}&q=${encodeURIComponent(text)}`)
-if (!res.data?.status || !res.data?.song || !res.data?.downloadUrl) throw new Error("No se encontró la canción en Adonix.")
-const s = res.data.song
-const data = { title: s.title || "Desconocido", artist: s.artist || "Desconocido", duration: s.duration || "Desconocido", image: s.thumbnail || null, download: res.data.downloadUrl, url: s.spotifyUrl || text }
-const caption = `「✦」Descargando *<${data.title}>*\n\nꕥ Autor » *${data.artist}*\nⴵ Duración » *${data.duration}*\n🜸 Enlace » ${data.url}`
-const bannerBuffer = data.image ? await (await fetch(data.image)).buffer() : null
-await conn.sendMessage(m.chat, {
-text: caption,
-contextInfo: {
-externalAdReply: {
-title: '✧ s⍴᥆𝗍і𝖿ᥡ • mᥙsіᥴ ✧',
-body: dev,
-mediaType: 1,
-mediaUrl: data.url,
-sourceUrl: data.url,
-thumbnail: bannerBuffer,
-showAdAttribution: false,
-containsAutoReply: true,
-renderLargerThumbnail: true
-}}}, { quoted: m })
-await conn.sendMessage(m.chat, { audio: { url: data.download }, fileName: `${data.title}.mp3`, mimetype: 'audio/mpeg' }, { quoted: m })
-await m.react('✔️')
-} catch (err) {
-await m.react('✖️')
-m.reply(`⚠︎ Se ha producido un problema.\n> Usa *${usedPrefix}report* para informarlo.\n\n${err.message}`)
-}}
+import fetch from 'node-fetch';
+import axios from 'axios';
 
-handler.help = ["spotify"]
-handler.tags = ["download"]
-handler.command = ["spotify", "splay"]
+const handler = async (m, { conn, command, args, text, usedPrefix}) => {
+    if (!text) throw `_*[ ⚠️ ] Agrega lo que quieres buscar*_\n\n_Ejemplo:_\n${usedPrefix}${command} Jomblo Happy`;
 
-export default handler
+    try {
+        // 1. Buscar canción en Spotify
+        const searchUrl = `https://api.vreden.my.id/api/v1/search/spotify?query=${encodeURIComponent(text)}&limit=1`;
+        const { data} = await axios.get(searchUrl);
+
+        if (!data ||!data.data || data.data.length === 0) {
+            throw `_*[ ⚠️ ] No se encontraron resultados para "${text}" en Spotify.*_`;
+}
+
+        const track = data.data[0];
+        const { title, artist, duration, url, image} = track;
+
+        const info = `⧁ 𝙏𝙄𝙏𝙐𝙇𝙊
+» ${title}
+﹘﹘﹘﹘﹘﹘﹘﹘﹘﹘﹘﹘
+⧁ 𝗗𝗨𝗥𝗔𝗖𝗜𝗢𝗡
+» ${duration}
+﹘﹘﹘﹘﹘﹘﹘﹘﹘﹘﹘﹘
+⧁  𝘼𝙍𝙏𝙄𝙎𝙏𝘼
+» ${artist}
+﹘﹘﹘﹘﹘﹘﹘﹘﹘﹘﹘﹘
+⧁ 𝙐𝙍𝙇
+» ${url}
+
+_*🎶 Enviando música...*_`.trim();
+
+        await conn.sendFile(m.chat, image, 'spotify.jpg', info, m);
+
+        // 2. Descargar canción usando la URL del resultado
+        const downloadUrl = `https://api.vreden.my.id/api/v1/download/spotify?url=${encodeURIComponent(url)}`;
+        const response = await fetch(downloadUrl);
+        const result = await response.json();
+
+        if (result && result.data && result.data.url) {
+            const audioUrl = result.data.url;
+            const filename = `${title || 'audio'}.mp3`;
+
+            await conn.sendMessage(m.chat, {
+                audio: { url: audioUrl},
+                fileName: filename,
+                mimetype: 'audio/mpeg',
+                caption: `╭━❰  *Spotify*  ❱━⬣\n${filename}\n╰━❰ *${botname}* ❱━⬣`,
+                quoted: m
+});
+} else {
+            throw new Error('_*[ ❌ ] Ocurrió un error al descargar el archivo mp3*_');
+}
+
+} catch (e) {
+        await conn.reply(m.chat, `❌ _*Comando Spotify Falló. Intenta nuevamente.*_`, m);
+        console.error('❌ Spotify Error:', e);
+}
+};
+
+handler.tags = ['downloader'];
+handler.command = ['spotify'];
+export default handler;
