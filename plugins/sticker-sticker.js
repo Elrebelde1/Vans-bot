@@ -1,4 +1,3 @@
-Pon para que salga así como sale en la foto el último texto con diferente diseño y texto que diga Barboza - Sasuke 
 
 import { sticker} from '../lib/sticker.js'
 import uploadFile from '../lib/uploadFile.js'
