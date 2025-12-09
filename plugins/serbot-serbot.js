@@ -41,7 +41,7 @@ para vincularte como *Sub-Bot Temporal* en esta sesión.
 ¡Muévete como el viento, shinobi!
 `;
 let rtx2 = `
-╔═══『 𝙲𝙾𝙳𝙸𝙶𝙾 𝟾 𝙳𝙸𝙶𝙸𝚃𝙾𝚂 』═══╗
+『 𝙲𝙾𝙳𝙸𝙶𝙾 𝟾 𝙳𝙸𝙶𝙸𝚃𝙾𝚂 』
 
 🔐 *Conexión Sub-Bot Temporal (Código)*
 
