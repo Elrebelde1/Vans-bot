@@ -1,75 +1,169 @@
-import fetch from 'node-fetch';
+//Codigo Echo Por MediaHub Software Para Sasuke Bot * No Copiar Ni Reutilizar El Código En Sus Bugs 
+import axios from "axios";
+import path from "path";
+import { URL } from "url";
 
-const handler = async (m, { conn, text, usedPrefix, command}) => {
-  if (!text) {
-    return m.reply(`⚠️ *Uso incorrecto.*\n📌 Ejemplo: \`${usedPrefix + command} https://www.mediafire.com/file/ejemplo/file.zip\``);
-  }
+const bytesToKB = (bytes) => (!bytes ? 0 : Math.floor(Number(bytes) / 1024));
 
-  if (!/^https?:\/\/(www\.)?mediafire\.com/.test(text)) {
-    return m.reply(`⚠️ *Enlace no válido.*\n📌 Asegúrate de ingresar una URL de MediaFire válida.\n\nEjemplo: \`${usedPrefix + command} https://www.mediafire.com/file/ejemplo/file.zip\``);
-  }
+const formatSize = (size) => {
+  if (!size) return "0 KB";
+  const bytes = Number(size);
+  if (isNaN(bytes)) return String(size);
+  const mb = bytes / (1024 * 1024);
+  return mb >= 1 ? `${mb.toFixed(2)} MB` : `${Math.floor(bytes / 1024)} KB`;
+};
 
-  await m.react("⏳");
-
+const getFilenameFromUrl = (url) => {
   try {
-    // ➡️ CAMBIO REALIZADO AQUÍ: Nueva URL de la API de nekolabs
-    const apiUrl = `https://api.nekolabs.web.id/downloader/mediafire?url=${encodeURIComponent(text)}`;
-    
-    // --- Resto del código se mantiene igual, asumiendo una respuesta JSON similar ---
-    const response = await fetch(apiUrl);
-
-    if (!response.ok) {
-      throw new Error(`Error de la API: ${response.status} ${response.statusText}`);
-    }
-
-    const data = await response.json();
-
-    // 💡 **POSIBLE AJUSTE NECESARIO:**
-    // La estructura de 'data.data.url', 'data.data.title', etc., 
-    // debe coincidir con la respuesta JSON de la API de nekolabs. 
-    // Si la API de nekolabs devuelve una estructura diferente, por ejemplo 'data.result.link',
-    // deberás ajustar las líneas siguientes.
-    if (!data.status || !data.data || !data.data.url) {
-      throw new Error("No se pudo obtener el enlace de descarga o la API de nekolabs devolvió un formato inesperado.");
-    }
-
-    const fileInfo = data.data;
-    const fileResponse = await fetch(fileInfo.url);
-    if (!fileResponse.ok) {
-      throw new Error("No se pudo descargar el archivo.");
-    }
-
-    const fileBuffer = await fileResponse.buffer();
-
-    const caption = `
-📂 *Nombre del archivo:* ${fileInfo.title}
-📦 *Tamaño:* ${fileInfo.size}
-📏 *Tipo:* ${fileInfo.mime}
-🔗 *Extensión:* ${fileInfo.extension}
-`;
-
-    await conn.sendMessage(m.chat, { text: caption.trim()}, { quoted: m});
-
-    await conn.sendMessage(m.chat, {
-      document: fileBuffer,
-      mimetype: fileInfo.mime,
-      fileName: fileInfo.title
-    }, { quoted: m});
-
-    await m.react("✅");
-
-  } catch (error) {
-    console.error("❌ Error en el comando mediafire:", error);
-    await conn.sendMessage(m.chat, {
-      text: `❌ *Ocurrió un error al procesar la solicitud:*\n_${error.message}_\n\n🔹 Inténtalo de nuevo más tarde.`
-    }, { quoted: m});
-
-    await m.react("❌");
+    const parsed = new URL(url);
+    const name = decodeURIComponent(path.basename(parsed.pathname));
+    return name || "archivo_desconocido";
+  } catch {
+    return "archivo_desconocido";
   }
 };
 
-handler.help = ['mediafire <url>'];
-handler.tags = ['descargas'];
-handler.command = ['mediafire'];
+let processingGlobal = false;
+const processingChats = new Set();
+
+let handler = async (m, { conn, text, usedPrefix, command }) => {
+  await m.react('📨');
+
+  try {
+    if (processingGlobal || processingChats.has(m.chat)) {
+      return await m.reply(
+        `
+╭─────────────♂
+│ ⚠️ El sistema ya está procesando un archivo.
+│ ⏳ Intenta nuevamente en unos minutos.
+╰─────────────♂`,
+        m
+      );
+    }
+
+    if (!text?.trim()) {
+      return await m.reply(
+        `
+╭─────────────♂
+│ 📦 Debes ingresar un enlace válido de MediaFire.
+│
+│ 💠 Ejemplo:
+│ ${usedPrefix + command} https://www.mediafire.com/file/xxxx
+╰─────────────♂`,
+        m
+      );
+    }
+
+    if (!/https?:\/\/(www\.)?mediafire\.com\//i.test(text)) {
+      return await m.reply(
+        `
+╭─────────────♂
+│ 🚫 Ese enlace no es de MediaFire.
+│ Ingresa un enlace válido.
+╰─────────────♂`,
+        m
+      );
+    }
+
+    processingGlobal = true;
+    processingChats.add(m.chat);
+
+    const initialMsg = await m.reply(`🔄 Procesando enlace...\n🛡️ Espera un momento...`);
+    await m.react('🔄');
+
+    let fileData = null;
+
+    try {
+      const { data } = await axios.get(
+        "https://fgsi.koyeb.app/api/downloader/mediafire",
+        {
+          params: {
+            apikey: "fgsiapi-26242e54-6d",
+            url: text
+          },
+          timeout: 20000
+        }
+      );
+//no usen la Apikey pndjs 🖕🏻
+      if (data?.status && data.data?.downloadUrl) {
+        const r = data.data;
+        fileData = {
+          name: r.filename || getFilenameFromUrl(r.downloadUrl),
+          mime: r.mimetype || "application/octet-stream",
+          sizeText: r.size ? `${(r.size / (1024 * 1024)).toFixed(2)} MB` : "0 KB",
+          sizeKB: bytesToKB(r.size),
+          downloadUrl: r.downloadUrl
+        };
+      } else throw new Error();
+    } catch {
+      const { data } = await axios.get(
+        "https://api.nekolabs.my.id/downloader/mediafire",
+        {
+          params: { url: text },
+          timeout: 20000
+        }
+      );
+
+      if (data?.status && data.result?.download_url) {
+        const r = data.result;
+        fileData = {
+          name: r.filename || getFilenameFromUrl(r.download_url),
+          mime: r.mimetype || "application/octet-stream",
+          sizeText: r.filesize || "0 KB",
+          sizeKB: bytesToKB(r.size),
+          downloadUrl: r.download_url
+        };
+      } else throw new Error("No se pudo obtener el archivo.");
+    }
+
+    if (!fileData?.downloadUrl) throw new Error("No se pudo obtener el archivo.");
+
+    fileData.name = fileData.name || getFilenameFromUrl(fileData.downloadUrl);
+
+    await m.react('📥');
+
+    await conn.sendMessage(
+      m.chat,
+      {
+        document: { url: fileData.downloadUrl },
+        fileName: fileData.name,
+        mimetype: fileData.mime,
+        caption: `
+╭─────────────
+│ 📁 Nombre: ${fileData.name}
+│ 📦 Tamaño: ${fileData.sizeText}
+│ ⚙️ Tipo: ${fileData.mime}
+╰─────────────
+Sasuke-Bot™
+        `.trim()
+      },
+      { quoted: initialMsg }
+    );
+
+    await m.react('🟢');
+
+  } catch (e) {
+    await m.react('🔴');
+
+    await m.reply(
+      `
+╭─────────────
+│ ❌ Error al procesar el archivo.
+│
+│ 📋 Detalle:
+│ ${e.message}
+╰─────────────`,
+      m
+    );
+
+  } finally {
+    processingGlobal = false;
+    processingChats.delete(m.chat);
+  }
+};
+
+handler.help = ["mediafire <url>"];
+handler.tags = ["descargas"];
+handler.command = /^(mediafire|mf|mfdl)$/i;
 
 export default handler;
