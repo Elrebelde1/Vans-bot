@@ -1,31 +1,50 @@
+import fetch from 'node-fetch'
 
-import fetch from 'node-fetch';
+let handler = async (m, { conn, usedPrefix, command, text }) => {
+  const ctxErr = (global.rcanalx || {})
+  const ctxOk = (global.rcanalr || {})
 
-const handler = async (m, { conn, args }) => {
-  if (!args[0]) {
-    return m.reply('🚩 Ingresa un mensaje para que el bot responda.\n📌 Ejemplo: `.botai Hola, ¿cómo estás?`');
+  if (!text) {
+    await conn.sendMessage(m.chat, { react: { text: '❌', key: m.key } })
+    return conn.reply(m.chat, `🌀 *.ia* 🤖 *Debes escribir tu modelo y tu pregunta*\nEjemplo: ${usedPrefix}ia gpt-5-nano ¿Hola?`, m, ctxErr)
   }
 
-  const text = args.join(' ');
-  const apiUrl = `https://api.nekorinn.my.id/ai/chatbot?ai_name=Barboza&text=${encodeURIComponent(text)}`;
+  let args = text.split(' ')
+  let model = args.shift().toLowerCase()
+  const question = args.join(' ')
+
+  const modelosDisponibles = ['gpt-5-nano', 'claude', 'gemini', 'deepseek', 'grok', 'meta-ai', 'qwen']
+
+  if (!modelosDisponibles.includes(model)) {
+    await conn.sendMessage(m.chat, { react: { text: '❌', key: m.key } })
+    return conn.reply(m.chat, `🌀 *Modelo de IA inválido*\nModelos disponibles: ${modelosDisponibles.join(', ')}`, m, ctxErr)
+  }
+
+  if (!question) {
+    await conn.sendMessage(m.chat, { react: { text: '❌', key: m.key } })
+    return conn.reply(m.chat, `🌀 *Escribe tu pregunta después del modelo*`, m, ctxErr)
+  }
 
   try {
-    m.reply('🤖 Generando respuesta...');
-    
-    const response = await fetch(apiUrl);
-    if (!response.ok) throw new Error(`Error en la API: ${response.statusText}`);
+    await conn.sendMessage(m.chat, { react: { text: '💭', key: m.key } })
+    await conn.sendPresenceUpdate('composing', m.chat)
 
-    const json = await response.json();
-    if (json && json.data) {
-      await conn.sendMessage(m.chat, { text: `🤖 *sᥲsᥙkᥱ ᑲ᥆𝗍 mძ 🌀 dice:* ${json.data}` }, { quoted: m });
-    } else {
-      await conn.sendMessage(m.chat, { text: "❌ No se obtuvo respuesta de la IA." }, { quoted: m });
-    }
-  } catch (error) {
-    console.error('❌ Error en la solicitud:', error);
-    m.reply('🚩 Ocurrió un error, intenta nuevamente más tarde.');
+    const response = await fetch(`https://api-adonix.ultraplus.click/ai/chat?apikey=${global.apikey}&q=${encodeURIComponent(question)}&model=${model}`)
+    const data = await response.json()
+
+    if (!data.status || !data.reply) throw new Error('No se recibió respuesta de la API')
+
+    await conn.reply(m.chat, data.reply, m, ctxOk)
+    await conn.sendMessage(m.chat, { react: { text: '✅', key: m.key } })
+
+  } catch (err) {
+    await conn.sendMessage(m.chat, { react: { text: '❌', key: m.key } })
+    conn.reply(m.chat, `❌️ *Error en la IA:* ${err.message}`, m, ctxErr)
   }
-};
+}
 
-handler.command = ['botai'];
-export default handler;
+handler.help = ["ia"]
+handler.tags = ["ai"]
+handler.command = ["ia"]
+
+export default handler
