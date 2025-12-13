@@ -13,22 +13,19 @@ let handler = async (m, { conn, text, usedPrefix, command}) => {
     const apiUrl = `https://api.vreden.my.id/api/v1/search/google?query=${query}&count=10`;
 
     const res = await fetch(apiUrl);
-    if (!res.ok) {
-      const errorText = await res.text();
-      throw new Error(`Error ${res.status}: ${errorText}`);
-}
+    if (!res.ok) throw new Error(`Error ${res.status}: ${res.statusText}`);
 
     const json = await res.json();
-    const results = json?.result?.data;
+    const results = json?.result;
 
     if (!Array.isArray(results) || results.length === 0) {
       return m.reply("❌ No se encontraron resultados para tu búsqueda.");
 }
 
-    let message = `🔎 *Resultados para:* "${text}"\n\n`;
+    let message = `🔎 *Resultados de Google para:* "${text}"\n\n`;
     for (let i = 0; i < results.length; i++) {
       const item = results[i];
-      message += `*${i + 1}. ${item.title || "Sin título"}*\n${item.link || "Sin enlace"}\n\n`;
+      message += `*${i + 1}. ${item.title || "Sin título"}*\n🔗 ${item.link || "Sin enlace"}\n📝 ${item.description || "Sin descripción"}\n\n`;
 }
 
     await conn.reply(m.chat, message.trim(), m);
@@ -39,8 +36,8 @@ let handler = async (m, { conn, text, usedPrefix, command}) => {
 }
 };
 
-handler.help = ["buscar <término>"];
-handler.tags = ["internet"];
-handler.command = ["buscar", "google", "search"];
+handler.help = ["google <término>"];
+handler.tags = ["internet", "busqueda"];
+handler.command = ["google", "buscar", "gsearch"];
 
 export default handler;
