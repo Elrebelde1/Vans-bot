@@ -6,7 +6,7 @@ let handler = async (m, { conn, text, usedPrefix, command}) => {
     return m.reply(`📌 *Uso correcto:*\n${usedPrefix + command} <término de búsqueda>\n📍 *Ejemplo:* ${usedPrefix + command} Vreden Bot`);
 }
 
-  await m.react("🔍");
+  await m.react("🔍"); // Reacción inicial
 
   try {
     const query = encodeURIComponent(text.trim());
@@ -16,9 +16,8 @@ let handler = async (m, { conn, text, usedPrefix, command}) => {
     if (!res.ok) throw new Error(`Error ${res.status}: ${res.statusText}`);
 
     const json = await res.json();
-
-    // La API devuelve un array directamente en `result`
     const results = json?.result;
+
     if (!Array.isArray(results) || results.length === 0) {
       return m.reply("❌ No se encontraron resultados para tu búsqueda.");
 }
@@ -30,7 +29,7 @@ let handler = async (m, { conn, text, usedPrefix, command}) => {
 }
 
     await conn.reply(m.chat, message.trim(), m);
-    await m.react("✅");
+    await m.react("✅"); // Reacción final
 } catch (error) {
     console.error("❌ Error:", error);
     await conn.reply(m.chat, `🚨 *Error:* ${error.message || "No se pudo realizar la búsqueda."}`, m);
