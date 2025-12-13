@@ -16,9 +16,15 @@ let handler = async (m, { conn, text, usedPrefix, command}) => {
     if (!res.ok) throw new Error(`Error ${res.status}: ${res.statusText}`);
 
     const json = await res.json();
-    const results = json?.result;
 
-    if (!Array.isArray(results) || results.length === 0) {
+    // Algunos endpoints devuelven los resultados directamente en `result`, otros en `result.data`
+    const results = Array.isArray(json?.result)
+? json.result
+: Array.isArray(json?.result?.data)
+? json.result.data
+: [];
+
+    if (results.length === 0) {
       return m.reply("❌ No se encontraron resultados para tu búsqueda.");
 }
 
