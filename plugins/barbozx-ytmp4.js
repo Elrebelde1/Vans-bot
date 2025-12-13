@@ -1,4 +1,4 @@
-
+ñ
 import fetch from "node-fetch";
 
 let handler = async (m, { conn, text, usedPrefix, command}) => {
@@ -9,7 +9,10 @@ let handler = async (m, { conn, text, usedPrefix, command}) => {
   await m.react("⏳"); // Reacción inicial
 
   try {
-    const apiUrl = `https://api.vreden.my.id/api/v1/download/youtube/video?url=${encodeURIComponent(text)}&quality=360`;
+    // Limpiar URL si contiene parámetros adicionales
+    const cleanUrl = text.split("?")[0];
+    const apiUrl = `https://api.vreden.my.id/api/v1/download/youtube/video?url=${encodeURIComponent(cleanUrl)}&quality=360`;
+
     const res = await fetch(apiUrl);
     if (!res.ok) throw new Error(`Error ${res.status}: ${res.statusText}`);
 
@@ -20,7 +23,7 @@ let handler = async (m, { conn, text, usedPrefix, command}) => {
       return m.reply("❌ No se pudo obtener el video. Verifica el enlace o intenta con otro.");
 }
 
-    const { title} = result.metadata;
+    const { title = "video"} = result.metadata || {};
     const videoUrl = result.download.url;
     const filename = result.download.filename || `${title}.mp4`;
 
@@ -29,7 +32,7 @@ let handler = async (m, { conn, text, usedPrefix, command}) => {
       {
         video: { url: videoUrl},
         caption: `🎬 *${title}*\n\n✅ Video descargado con éxito.`,
-        fileName: filename
+        fileName: filename,
 },
       { quoted: m}
 );
