@@ -1,50 +1,27 @@
-import fetch from 'node-fetch'
+import fetch from "node-fetch";
 
-let handler = async (m, { conn, usedPrefix, command, text }) => {
-  const ctxErr = (global.rcanalx || {})
-  const ctxOk = (global.rcanalr || {})
-
+let handler = async (m, { conn, text, usedPrefix, command }) => {
   if (!text) {
-    await conn.sendMessage(m.chat, { react: { text: '❌', key: m.key } })
-    return conn.reply(m.chat, `🌀 *.ia* 🤖 *Debes escribir tu modelo y tu pregunta*\nEjemplo: ${usedPrefix}ia gpt-5-nano ¿Hola?`, m, ctxErr)
-  }
-
-  let args = text.split(' ')
-  let model = args.shift().toLowerCase()
-  const question = args.join(' ')
-
-  const modelosDisponibles = ['gpt-5-nano', 'claude', 'gemini', 'deepseek', 'grok', 'meta-ai', 'qwen']
-
-  if (!modelosDisponibles.includes(model)) {
-    await conn.sendMessage(m.chat, { react: { text: '❌', key: m.key } })
-    return conn.reply(m.chat, `🌀 *Modelo de IA inválido*\nModelos disponibles: ${modelosDisponibles.join(', ')}`, m, ctxErr)
-  }
-
-  if (!question) {
-    await conn.sendMessage(m.chat, { react: { text: '❌', key: m.key } })
-    return conn.reply(m.chat, `🌀 *Escribe tu pregunta después del modelo*`, m, ctxErr)
+    return conn.reply(m.chat, `🌸 ¡Hola! ¿cómo puedo ayudarte hoy?`, m, rcanal);
   }
 
   try {
-    await conn.sendMessage(m.chat, { react: { text: '💭', key: m.key } })
-    await conn.sendPresenceUpdate('composing', m.chat)
+    const url = `https://api.kirito.my/api/chatgpt?q=${encodeURIComponent(text)}&apikey=by_deylin`;
+    const res = await fetch(url);
+    const data = await res.json();
 
-    const response = await fetch(`https://api-adonix.ultraplus.click/ai/chat?apikey=${global.apikey}&q=${encodeURIComponent(question)}&model=${model}`)
-    const data = await response.json()
+    if (!data || !data.response) {
+      return conn.reply(m.chat, "❌ No recibí respuesta de la IA, intenta de nuevo.", m, fake);
+    }
 
-    if (!data.status || !data.reply) throw new Error('No se recibió respuesta de la API')
-
-    await conn.reply(m.chat, data.reply, m, ctxOk)
-    await conn.sendMessage(m.chat, { react: { text: '✅', key: m.key } })
-
-  } catch (err) {
-    await conn.sendMessage(m.chat, { react: { text: '❌', key: m.key } })
-    conn.reply(m.chat, `❌️ *Error en la IA:* ${err.message}`, m, ctxErr)
+    await conn.reply(m.chat, `${data.response}`, m, rcanal);
+  } catch (e) {
+    console.error(e);
+    await conn.reply(m.chat, "⚠️ Hubo un error al conectar con la IA.", m, fake);
   }
-}
+};
 
-handler.help = ["ia", "ai"]
-handler.tags = ["ai"]
-handler.command = ["ia", "ai", "itsuki"]
+handler.tags = ["ia"];
+handler.command = handler.help =['gpt', 'chatgpt']
 
-export default handler
+export default handler;
