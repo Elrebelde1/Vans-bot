@@ -6,7 +6,7 @@ let handler = async (m, { conn, text, usedPrefix, command}) => {
     return m.reply(`📌 *Uso correcto:*\n${usedPrefix + command} <término de búsqueda>\n📍 *Ejemplo:* ${usedPrefix + command} Vreden Bot`);
 }
 
-  await m.react("🔍"); // Reacción de búsqueda
+  await m.react("🔍");
 
   try {
     const query = encodeURIComponent(text);
@@ -16,16 +16,17 @@ let handler = async (m, { conn, text, usedPrefix, command}) => {
     if (!res.ok) throw new Error(`Error ${res.status}: ${res.statusText}`);
 
     const json = await res.json();
-    const results = json?.result;
+    const results = json?.result?.data;
 
-    if (!results || results.length === 0) {
+    if (!Array.isArray(results) || results.length === 0) {
       return m.reply("❌ No se encontraron resultados para tu búsqueda.");
 }
 
     let message = `🔎 *Resultados para:* "${text}"\n\n`;
-    results.forEach((item, index) => {
-      message += `*${index + 1}. ${item.title}*\n${item.link}\n\n`;
-});
+    for (let i = 0; i < results.length; i++) {
+      const item = results[i];
+      message += `*${i + 1}. ${item.title}*\n${item.link}\n\n`;
+}
 
     await conn.reply(m.chat, message.trim(), m);
     await m.react("✅");
