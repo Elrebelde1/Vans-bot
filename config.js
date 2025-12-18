@@ -13,7 +13,7 @@ import axios from 'axios'
   [ '584226480049', 'Goku', true ],
   [ '573136604302', 'nopclip', true ],
   [ '595972157130'],
-  [ '174560573964411@lid', 'Rayo OFC', true ],
+  [ '14388165130', 'Rayo OFC', true ],
   [ '573136602975', "I'm Fz ~", true ],
   [ '573136602975', 'juanito', true ],
   [ '51928626068', "MediaHub",true ],
