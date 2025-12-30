@@ -2,20 +2,17 @@ import fetch from "node-fetch";
 
 const handler = async (m, { isOwner, isAdmin, conn, text, participants, args}) => {
   const chat = global.db.data.chats[m.chat] || {};
-  // 🎄 Usamos emojis de campanas o estrellas para la mención
   const emoji = '🔔'; 
 
-  // Solo Santa y sus Elfos principales (admin/owner) pueden tocar la campana
   if (!(isAdmin || isOwner)) {
     global.dfail('admin', m, conn);
     throw new Error('Solo los Elfos Jefes o Santa tienen permiso para usar este comando.');
-}
+  }
 
   const customMessage = args.join(' ');
   const groupMetadata = await conn.groupMetadata(m.chat);
   const groupName = groupMetadata.subject;
 
-  // Banderas de países (se mantienen para indicar ubicación, pero se añade un toque festivo)
   const countryFlags = {
     '1': '🇺🇸', '44': '🇬🇧', '33': '🇫🇷', '49': '🇩🇪', '39': '🇮🇹', '81': '🇯🇵',
     '82': '🇰🇷', '86': '🇨🇳', '7': '🇷🇺', '91': '🇮🇳', '61': '🇦🇺', '64': '🇳🇿',
@@ -25,8 +22,8 @@ const handler = async (m, { isOwner, isAdmin, conn, text, participants, args}) =
     '596': '🇲🇶', '597': '🇸🇷', '598': '🇺🇾', '53': '🇨🇺', '20': '🇪🇬', '972': '🇮🇱',
     '90': '🇹🇷', '63': '🇵🇭', '62': '🇮🇩', '60': '🇲🇾', '65': '🇸🇬', '66': '🇹🇭',
     '31': '🇳🇱', '32': '🇧🇪', '30': '🇬🇷', '36': '🇭🇺', '46': '🇸🇪', '47': '🇳🇴',
-    '48': '🇵🇱', '421': '🇸🇰', '420': '🇨🇿', '40': '🇷🇴', '43': '🇦🇹', '373': '🇲🇩'
-};
+    '48': '🇵🇱', '421': '🇸🇰', '420': '🇨🇿', '40': '🇷🇴', '43': '🇦🇹', '373': '🇲DOL'
+  };
 
   const getCountryFlag = (id) => {
     const phoneNumber = id.split('@')[0];
@@ -34,64 +31,55 @@ const handler = async (m, { isOwner, isAdmin, conn, text, participants, args}) =
     let prefix = phoneNumber.substring(0, 3);
     if (!countryFlags[prefix]) {
       prefix = phoneNumber.substring(0, 2);
-}
-    return countryFlags[prefix] || '🏳️‍🌈';
-};
+    }
+    return countryFlags[prefix] || '🌎';
+  };
 
-  let messageText = `*❄️ LLAMADA URGENTE DEL POLO NORTE ❄️*\n\n*GRUPO: ${groupName}*\n*AYUDANTES PRESENTES: ${participants.length}*\n\n_Mensaje de Santa: ${customMessage || '¡Es hora de preparar los regalos!'}_
-┌──⭓ *¡A TRABAJAR, DUENDES!*
-`;
+  let messageText = `*❄️ LLAMADA URGENTE DEL POLO NORTE ❄️*\n\n*GRUPO: ${groupName}*\n*AYUDANTES PRESENTES: ${participants.length}*\n\n_Mensaje de Santa: ${customMessage || '¡Es hora de preparar los regalos!'}_\n\n┌──⭓ *¡A TRABAJAR, DUENDES!*\n`;
 
-  // Iteración navideña
   for (const mem of participants) {
     messageText += `${emoji} ${getCountryFlag(mem.id)} @${mem.id.split('@')[0]}\n`;
-}
+  }
   messageText += `└───────⭓\n\n*🦌 Sasuke Bot MD - El Trineo de Santa 🎅*`;
 
-  // Puedes cambiar la imagen y el audio a algo navideño si lo tienes
-  const imageUrl = 'https://qu.ax/4j9h7'; 
+  // --- CAMBIOS REALIZADOS AQUÍ ---
+  // He actualizado el enlace a uno directo de Imgur que termina en .jpg
+  const imageUrl = 'https://i.imgur.com/vH9Xv9H.jpg'; 
   const audioUrl = 'https://cdn.russellxz.click/3fd9f7de.mp3';
 
-  // fkontak con temática de Santa Claus / Navidad
+  // Miniatura para el mensaje de contacto
+  let thumb;
+  try {
+    thumb = await (await fetch('https://i.imgur.com/vH9Xv9H.jpg')).buffer();
+  } catch {
+    thumb = Buffer.alloc(0); // Buffer vacío si falla la descarga
+  }
+
   const fkontak = {
-    key: {
-      participants: "0@s.whatsapp.net",
-      remoteJid: "status@broadcast",
-      fromMe: false,
-      id: "Navidad"
-},
+    key: { participants: "0@s.whatsapp.net", remoteJid: "status@broadcast", fromMe: false, id: "Navidad" },
     message: {
       locationMessage: {
         name: "*Santa's Helper Bot 🎄*",
-        jpegThumbnail: await (await fetch('https://cdn-sunflareteam.vercel.app/images/fa68a035ca.jpg')).buffer(),
-        vcard:
-          "BEGIN:VCARD\n" +
-          "VERSION:3.0\n" +
-          "N:;Santa;;;\n" +
-          "FN:Santa Claus Bot\n" +
-          "ORG:Polo Norte Developers\n" +
-          "TITLE:\n" +
-          "item1.TEL;waid=19709001746:+1 (970) 900-1746\n" +
-          "item1.X-ABLabel:Trineo\n" +
-          "X-WA-BIZ-DESCRIPTION:🎅 Llamando a todos los Ayudantes y Duendes.\n" +
-          "X-WA-BIZ-NAME:SantaBot\n" +
-          "END:VCARD"
-}
-},
+        jpegThumbnail: thumb,
+        vcard: "BEGIN:VCARD\nVERSION:3.0\nN:;Santa;;;\nFN:Santa Claus Bot\nORG:Polo Norte Developers\nEND:VCARD"
+      }
+    },
     participant: "0@s.whatsapp.net"
-};
+  };
 
+  // Enviar Imagen con Texto
   await conn.sendMessage(m.chat, {
-    image: { url: imageUrl},
+    image: { url: imageUrl },
     caption: messageText,
     mentions: participants.map(a => a.id)
-}, { quoted: fkontak});
+  }, { quoted: fkontak });
 
+  // Enviar Audio
   await conn.sendMessage(m.chat, {
-    audio: { url: audioUrl},
+    audio: { url: audioUrl },
     mimetype: 'audio/mp4',
     ptt: true
-}, { quoted: fkontak});
+  }, { quoted: fkontak });
 };
 
 handler.help = ['todos'];
