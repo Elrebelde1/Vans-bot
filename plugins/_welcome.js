@@ -9,7 +9,7 @@ export async function before(m, { conn, groupMetadata}) {
     if (!chat ||!chat.bienvenida) return true;
 
     // --- ✅ Enlace de imagen solicitado por el usuario ---
-    const defaultImageUrl = 'https://qu.ax/yxwAs.jpg'; 
+    const defaultImageUrl = 'https://qu.ax/Ny958'; 
 
     // Función para obtener la imagen como buffer
     const get_default_image_buffer = async () => {
