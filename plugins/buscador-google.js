@@ -27,6 +27,6 @@ m.reply(`⚠︎ Se ha producido un problema.\n> Usa *${usedPrefix}report* para i
 
 handler.help = ['google']
 handler.command = ['google']
-handler.group = true
+handler.group = falso
 
 export default handler
