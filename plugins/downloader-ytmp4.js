@@ -1,3 +1,4 @@
+
 import fetch from "node-fetch"
 import yts from 'yt-search'
 
@@ -35,5 +36,8 @@ const handler = async (m, { conn, text, usedPrefix, command}) => {
 
 handler.command = handler.help = ['ytmp4']
 handler.tags = ['descargas']
+handler.group = true
 
 export default handler
+
+// Las funciones auxiliares (getVid, fetchFromApis, formatViews)
