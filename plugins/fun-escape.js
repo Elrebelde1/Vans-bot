@@ -1,65 +1,41 @@
+import fetch from 'node-fetch'
 
-const timeout = 60000; // 60 segundos para resolver el acertijo
+let handler = async (m, { text, usedPrefix, args }) => {
+  if (!text) {
+    return m.reply(`🔍 Por favor, dime qué imágenes deseas buscar en *Google*.\n\n📌 Ejemplo: ${usedPrefix}gimage gatos tiernos`)
+  }
 
-const handler = async (m, { conn}) => {
-    const acertijos = [
-        {
-            descripcion: "🔐 *Estás atrapado en una habitación cerrada.* Hay una mesa con tres objetos: un libro, una vela y un espejo. Uno de ellos tiene una pista para la salida.",
-            opciones: ["Revisar el libro", "Encender la vela", "Mirar el espejo"],
-            respuestaCorrecta: 2,
-            resultado: ["❌ No encuentras nada útil en el libro.", "❌ La vela solo ilumina, pero no revela pistas.", "✅ En el espejo aparece un código secreto que desbloquea la puerta."]
-},
-        {
-            descripcion: "🚪 *La puerta está bloqueada con un número misterioso.* En la pared hay una secuencia: 2, 4, 8, 16,??",
-            opciones: ["32", "20", "64"],
-            respuestaCorrecta: 0,
-            resultado: ["✅ La secuencia sigue duplicándose: 32 es la clave correcta.", "❌ 20 no tiene sentido con la progresión.", "❌ 64 es demasiado alto."]
-},
-        {
-            descripcion: "🕵️‍♂️ *Hay un cuadro en la habitación con una firma sospechosa.* Un papel en el suelo dice 'La clave está en el arte'.",
-            opciones: ["Examinar el marco", "Leer la firma del cuadro", "Romper el cuadro"],
-            respuestaCorrecta: 1,
-            resultado: ["❌ El marco está vacío.", "✅ La firma del artista contiene un código para desbloquear la salida.", "❌ Romper el cuadro solo deja trozos por todas partes."]
+  const query = encodeURIComponent(text.trim())
+  const maxResults = Math.min(Number(args[1]) || 7, 10)
+  const apiUrl = `https://delirius-apiofc.vercel.app/search/gimage?query=${query}`
+
+  try {
+    await m.react('🕒')
+    const res = await fetch(apiUrl)
+    const json = await res.json()
+
+    if (!Array.isArray(json.data) || json.data.length === 0) {
+      await m.react('❌')
+      return m.reply('😕 No se encontraron imágenes para tu búsqueda.')
+    }
+
+    let reply = `🖼️ *Imágenes encontradas para:* _${text}_\n\n`
+    json.data.slice(0, maxResults).forEach((item, i) => {
+      reply += `✨ *${i + 1}*\n`
+      reply += `🔗 ${item.url || '_Sin enlace disponible_'}\n\n`
+    })
+
+    await m.reply(reply.trim())
+    await m.react('✅')
+  } catch (err) {
+    await m.react('⚠️')
+    m.reply(`🚨 Ocurrió un error al realizar la búsqueda de imágenes.\n> Usa *${usedPrefix}report* para informarlo.\n\n🧾 Detalle: ${err.message}`)
+  }
 }
-    ];
 
-    const acertijoSeleccionado = acertijos[Math.floor(Math.random() * acertijos.length)];
+handler.help = ['gimage']
+handler.command = ['gimage']
+handler.tags = ['internet']
+handler.group = false
 
-    let mensaje = `🚪 *Escape Room Virtual* 🚪\n\n📜 *Escenario:* ${acertijoSeleccionado.descripcion}\n\n`;
-    acertijoSeleccionado.opciones.forEach((opcion, i) => {
-        mensaje += `🔹 ${i + 1}. ${opcion}\n`;
-});
-
-    mensaje += "\n📌 *Responde con el número de la opción correcta antes de que el tiempo se acabe!*";
-
-    conn.escapeGame = conn.escapeGame || {};
-    conn.escapeGame[m.chat] = {
-        respuestaCorrecta: acertijoSeleccionado.respuestaCorrecta,
-        resultado: acertijoSeleccionado.resultado,
-        timeout: setTimeout(() => {
-            if (conn.escapeGame[m.chat]) {
-                conn.reply(m.chat, "⏰ *Tiempo agotado!* No lograste escapar a tiempo.", m);
-                delete conn.escapeGame[m.chat];
-}
-}, timeout)
-};
-
-    await conn.sendMessage(m.chat, { text: mensaje});
-};
-
-handler.before = async (m, { conn}) => {
-    if (conn.escapeGame && conn.escapeGame[m.chat]) {
-        const respuesta = parseInt(m.text.trim());
-        const { respuestaCorrecta, resultado} = conn.escapeGame[m.chat];
-
-        if (respuesta>= 1 && respuesta <= resultado.length) {
-            delete conn.escapeGame[m.chat];
-            return conn.reply(m.chat, resultado[respuesta - 1], m);
-} else {
-            return conn.reply(m.chat, `❌ *Opción no válida. Intenta con un número entre 1 y ${resultado.length}.*`, m);
-}
-}
-};
-
-handler.command = ["escape"];
-export default handler;
+export default handler
