@@ -33,8 +33,8 @@ let handler = async (m, { text, usedPrefix, args, conn }) => {
   }
 }
 
-handler.help = ['gimage']
-handler.command = ['gimage']
+handler.help = ['googleimg']
+handler.command = ['googleimg']
 handler.tags = ['internet']
 handler.group = false
 
