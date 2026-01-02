@@ -2,34 +2,36 @@
 import fetch from 'node-fetch'
 
 let handler = async (m, { text, usedPrefix, args}) => {
-  if (!text) return m.reply(`❀ Por favor, proporciona el término de búsqueda que deseas realizar a *Google*.\n\nEjemplo: ${usedPrefix}google gatos curiosos`)
+  if (!text) {
+    return m.reply(`🔍 Por favor, dime qué quieres buscar en *Google*.\n\n📌 Ejemplo: ${usedPrefix}google Momo Twice`)
+}
 
+  const query = encodeURIComponent(text.trim())
+  const apiUrl = `https://delirius-apiofc.vercel.app/search/googlesearch?query=${query}`
   const maxResults = Math.min(Number(args[1]) || 3, 10)
-  const cleanQuery = encodeURIComponent(text.trim())
-  const apiUrl = `https://api.vreden.my.id/api/v1/search/google?query=${cleanQuery}&count=${maxResults}`
 
   try {
     await m.react('🕒')
-    const response = await fetch(apiUrl)
-    const result = await response.json()
+    const res = await fetch(apiUrl)
+    const json = await res.json()
 
-    if (!response.ok || result.status === false ||!Array.isArray(result.result)) {
-      await m.react('✖️')
-      return m.reply('ꕥ No se encontraron resultados para esa búsqueda o la API rechazó la solicitud.')
+    if (!Array.isArray(json.data) || json.data.length === 0) {
+      await m.react('❌')
+      return m.reply('😕 No encontré resultados para esa búsqueda.')
 }
 
-    let replyMessage = `✦ Resultados de la búsqueda para: *${text}*\n\n`
-    result.result.slice(0, maxResults).forEach((item, index) => {
-      replyMessage += `❀ Título: *${index + 1}. ${item.title || 'Sin título'}*\n`
-      replyMessage += `✐︎ Descripción: ${item.description? `*${item.description}*`: '_Sin descripción_'}\n`
-      replyMessage += `🜸 URL: ${item.url || '_Sin url_'}\n\n`
+    let reply = `🔎 *Resultados de búsqueda para:* _${text}_\n\n`
+    json.data.slice(0, maxResults).forEach((item, i) => {
+      reply += `✨ *${i + 1}. ${item.title || 'Sin título'}*\n`
+      reply += `📝 ${item.description || '_Sin descripción_'}\n`
+      reply += `🔗 ${item.url || '_Sin URL_'}\n\n`
 })
 
-    await m.reply(replyMessage.trim())
-    await m.react('✔️')
-} catch (error) {
-    await m.react('✖️')
-    m.reply(`⚠︎ Se ha producido un problema.\n> Usa *${usedPrefix}report* para informarlo.\n\n${error.message}`)
+    await m.reply(reply.trim())
+    await m.react('✅')
+} catch (err) {
+    await m.react('⚠️')
+    m.reply(`🚨 Ocurrió un error al buscar en Google.\n> Usa *${usedPrefix}report* para informarlo.\n\n🧾 ${err.message}`)
 }
 }
 
