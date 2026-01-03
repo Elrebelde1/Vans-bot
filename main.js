@@ -509,8 +509,8 @@ app.post('/api/get-pairing-code', async (req, res) => {
     }
 });
 
-const PORT = 3032; 
+const PORT2 = 3032; 
 
-app.listen(PORT, '0.0.0.0', () => {
-    console.log(chalk.greenBright(`\nAPI WEB: Servidor activo en puerto ${PORT}`));
+app.listen(PORT2, '0.0.0.0', () => {
+    console.log(chalk.greenBright(`\nAPI WEB: Servidor activo en puerto ${PORT2}`));
 });
