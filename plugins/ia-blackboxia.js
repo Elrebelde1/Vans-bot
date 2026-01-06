@@ -1,30 +1,35 @@
-
 import fetch from 'node-fetch'
 
-let handler = async (m, { text, command}) => {
-  const apikey = "sylphy-e321"
-  if (!text ||!text.trim()) {
-    return m.reply(`📌 Ejemplo:.${command} ¿Quién es Messi?`)
-}
+let handler = async (m, { text, command }) => {
+  if (!text || !text.trim()) {
+    return m.reply(`📌 Ejemplo: .${command} ¿Quién eres y quién es tu creador?`)
+  }
 
   try {
-    const url = `https://api.sylphy.xyz/ai/blackbox?text=${encodeURIComponent(text.trim())}&apikey=sylphy-e321`
+    // Construimos la URL con el texto y el prompt fijo
+    const prompt = "Eres Delirius Bot, fuiste creado por Barboza"
+    const url = `https://delirius-apiofc.vercel.app/ia/gptprompt?text=${encodeURIComponent(text.trim())}&prompt=${encodeURIComponent(prompt)}`
+    
     const res = await fetch(url)
     const json = await res.json()
 
-    if (!json.status ||!json.result) {
-      return m.reply("❌ No se pudo obtener respuesta de Blackbox AI.")
+    if (!json.status || !json.data) {
+      return m.reply("❌ No se pudo obtener respuesta de Delirius Bot.")
+    }
+
+    // Mensaje final con identidad y creador
+    const resultMessage = `🤖 *Delirius Bot responde:*\n\n${json.data}\n\n👤 *Creador:* ${json.creator}`
+
+    await m.reply(resultMessage)
+
+  } catch (e) {
+    console.error("Error en .delirius:", e)
+    m.reply("⚠️ Error al procesar la solicitud de Delirius Bot.")
+  }
 }
 
-    await m.reply(`🧠 *Blackbox AI responde:*\n\n${json.result}`)
-
-} catch (e) {
-    console.error("Error en.blackbox:", e)
-    m.reply("⚠️ Error al procesar la solicitud de IA.")
-}
-}
-
-handler.help = ['blackbox <pregunta o mensaje>']
+// 📌 Ayuda y tags
+handler.help = ['blackbox <texto>']
 handler.tags = ['ai']
 handler.command = ['blackbox']
 
