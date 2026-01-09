@@ -8,7 +8,7 @@ let handler = async (m, { text, usedPrefix, args}) => {
 
   const query = encodeURIComponent(text.trim())
   const maxResults = Math.min(Number(args[1]) || 7, 10)
-  const apiUrl = `https://delirius-apiofc.vercel.app/search/googlesearch?query=${query}`
+  const apiUrl = `https://api.delirius.store/search/googlesearch?query=${query}`
 
   try {
     await m.react('🕒')
