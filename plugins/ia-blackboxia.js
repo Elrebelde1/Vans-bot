@@ -8,7 +8,7 @@ let handler = async (m, { text, command }) => {
   try {
     // Construimos la URL con el texto y el prompt fijo
     const prompt = "Eres Sasuke, fuiste creado por Barboza"
-    const url = `https://delirius-apiofc.vercel.app/ia/gptprompt?text=${encodeURIComponent(text.trim())}&prompt=${encodeURIComponent(prompt)}`
+    const url = `https://api.delirius.store/ia/gptprompt?text=${encodeURIComponent(text.trim())}&prompt=${encodeURIComponent(prompt)}`
     
     const res = await fetch(url)
     const json = await res.json()
