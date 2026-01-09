@@ -9,7 +9,7 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
   await m.react("⏳");
 
   try {
-    const apiUrl = `https://delirius-apiofc.vercel.app/download/apk?query=${encodeURIComponent(text)}`;
+    const apiUrl = `https://api.delirius.store/download/apk?query=${encodeURIComponent(text)}`;
     const response = await fetch(apiUrl);
     
     if (!response.ok) {
