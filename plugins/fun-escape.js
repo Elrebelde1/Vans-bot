@@ -7,7 +7,7 @@ let handler = async (m, { text, usedPrefix, args, conn }) => {
 
   const query = encodeURIComponent(text.trim())
   const maxResults = Math.min(Number(args[1]) || 5, 10) // máximo 10 imágenes
-  const apiUrl = `https://delirius-apiofc.vercel.app/search/gimage?query=${query}`
+  const apiUrl = `https://api.delirius.store/search/gimage?query=${query}`
 
   try {
     await m.react('🕒')
