@@ -5,7 +5,7 @@ const handler = async (m, { conn, text }) => {
     if (!text) return conn.reply(m.chat, '💥 Por favor, proporciona una consulta de búsqueda.', m)
     await m.react('🕒')
 
-    const apiUrl = `https://delirius-apiofc.vercel.app/search/yahoo?query=${encodeURIComponent(text)}&language=en`
+    const apiUrl = `https://api.delirius.store/yahoo?query=${encodeURIComponent(text)}&language=en`
     const res = await fetch(apiUrl)
     const json = await res.json()
 
