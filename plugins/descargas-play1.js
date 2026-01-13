@@ -1,52 +1,96 @@
 import yts from "yt-search";
 import fetch from "node-fetch";
 
-const handler = async (m, { conn, text }) => {
-  if (!text) return m.reply("🎧 *Ingresa el nombre de un video o una URL de YouTube.*");
+const handler = async (m, { conn, text, command, usedPrefix }) => {
+  if (!text || !text.trim()) {
+    return m.reply(`🦅 *¿Qᴜᴇ ʙᴜsᴄᴀs ᴇɴ ʟᴀ ᴏsᴄᴜʀɪᴅᴀᴅ?*\n\nUsᴏ ᴄᴏʀʀᴇᴄᴛᴏ:\n${usedPrefix + command} <ɴᴏᴍʙʀᴇ ᴏ URL>\n\nEx: ${usedPrefix + command} Ace of Base Happy Nation`);
+  }
 
-  await m.react("🔎");
+  await m.react("👁️");
 
   try {
     const search = await yts(text);
-    const video = search?.videos?.[0];
+    const video = search.videos[0];
 
-    if (!video) return m.reply("❌ *No se encontraron resultados.*");
-
-    // Usando la API de Vreden proporcionada en tu consulta
-    const apiUrl = `https://api.vreden.my.id/api/v1/download/play/audio?query=${encodeURIComponent(video.url)}`;
-    const response = await fetch(apiUrl);
-    const json = await response.json();
-
-    if (!json.status || !json.result.download.url) {
-      return m.reply("⚠️ *Error al convertir el audio con la API de Vreden.*");
+    if (!video) {
+      await m.react("❌");
+      return m.reply("🌑 *Mis ojos no ven nada con ese nombre.*");
     }
 
+    const urlToUse = video.url;
+    const { title, author, timestamp, views, thumbnail } = video;
+
     const caption = `
-╭─🎶 *Sasuke Bot - Audio* 🎶─╮
+╭─〔 ♆ *Uᴄʜɪʜᴀ Pʟᴀʏᴇʀ* ♆ 〕─╮
 │
-│ 🎵 *Título:* ${json.result.metadata.title}
-│ 👤 *Canal:* ${json.result.metadata.author.name}
-│ ⏱️ *Duración:* ${json.result.metadata.timestamp}
-│ 📥 *Enviando archivo...*
-╰──────────────────────────╯`;
+│ 🗡️ *Tɪᴛᴜʟᴏ:* ${title}
+│ 👤 *Aᴜᴛᴏʀ:* ${author.name}
+│ ⏳ *Dᴜʀᴀᴄɪᴏɴ:* ${timestamp}
+│ 👁️ *Vɪsᴛᴀs:* ${views.toLocaleString()}
+│ 🔗 *Lɪɴᴋ:* ${urlToUse}
+│
+╰─────────────────────╯
 
-    // Enviar miniatura y mensaje de descarga
-    await conn.sendFile(m.chat, json.result.metadata.thumbnail, "thumb.jpg", caption, m);
+🌑 *Eʟ ᴘᴏᴅᴇʀ sᴇ ᴇsᴛᴀ ᴄᴀɴᴀʟɪᴢᴀɴᴅᴏ...*`.trim();
 
-    // Enviar el archivo de audio directamente
-    await conn.sendMessage(m.chat, {
-      audio: { url: json.result.download.url },
-      mimetype: 'audio/mpeg',
-      fileName: `${json.result.metadata.title}.mp3`
-    }, { quoted: m });
+    await conn.sendFile(m.chat, thumbnail, "thumb.jpg", caption, m);
 
-    await m.react("✅");
+    const isVideo = /play2|playvid/i.test(command);
+    let dlUrl = null;
 
-  } catch (err) {
-    console.error(err);
-    return m.reply("💥 *Hubo un fallo en la solicitud.*");
+    // --- Intento con API Vreden (Principal) ---
+    try {
+      const type = isVideo ? "video" : "audio";
+      const apiVreden = await fetch(`https://api.vreden.my.id/api/v1/download/youtube/${type}?url=${encodeURIComponent(urlToUse)}&quality=${isVideo ? "360" : "128"}`);
+      const resVreden = await apiVreden.json();
+      
+      if (resVreden.status && resVreden.result?.download?.url) {
+        dlUrl = resVreden.result.download.url;
+      }
+    } catch (e) {
+      console.log("Error en Vreden API");
+    }
+
+    // --- Fallback: API de Respaldo (Ejemplo: Caliph o similar activa en 2025/2026) ---
+    if (!dlUrl) {
+      try {
+        const res = await fetch(`https://api.api-aries.com/api/v1/dl/youtube?url=${encodeURIComponent(urlToUse)}&type=${isVideo ? "mp4" : "mp3"}`);
+        const data = await res.json();
+        if (data.download_url) dlUrl = data.download_url;
+      } catch (e) {
+        dlUrl = null;
+      }
+    }
+
+    if (!dlUrl) throw new Error("Todas las fuentes de energía han fallado. El chakra se ha agotado.");
+
+    // Enviar el archivo
+    if (isVideo) {
+      await conn.sendMessage(m.chat, {
+        video: { url: dlUrl },
+        mimetype: "video/mp4",
+        fileName: `${title}.mp4`,
+        caption: `⚡ *Aquí tienes tu destino.*`
+      }, { quoted: m });
+      await m.react("🦅");
+    } else {
+      await conn.sendMessage(m.chat, {
+        audio: { url: dlUrl },
+        mimetype: "audio/mpeg",
+        fileName: `${title}.mp3`
+      }, { quoted: m });
+      await m.react("🎧");
+    }
+
+  } catch (error) {
+    console.error(error);
+    await m.react("❌");
+    m.reply(`⚠️ *💢 Mɪs ᴏᴊᴏs ʜᴀɴ sɪᴅᴏ ʙʟᴏϙᴜᴇᴀᴅᴏs.*\n\n*Detalle:* ${error.message}`);
   }
 };
 
-handler.command = ["play2", "vreden"]; // Nombres de comando ejemplo
+handler.help = ["play", "play2", "playvid"];
+handler.tags = ["descargas"];
+handler.command = /^(play|play2|playvid)$/i;
+
 export default handler;
