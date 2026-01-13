@@ -1,4 +1,3 @@
-
 import yts from "yt-search";
 import fetch from "node-fetch";
 
@@ -10,6 +9,7 @@ const handler = async (m, { conn, text, command, usedPrefix }) => {
   await m.react("👁️");
 
   try {
+    // 1. Búsqueda de metadatos
     const search = await yts(text);
     const video = search.videos[0];
 
@@ -18,8 +18,8 @@ const handler = async (m, { conn, text, command, usedPrefix }) => {
       return m.reply("🌑 *Mis ojos no ven nada con ese nombre.*");
     }
 
-    const urlToUse = video.url;
-    const { title, author, timestamp, views, thumbnail } = video;
+    const { title, author, timestamp, views, thumbnail, url: urlToUse } = video;
+    const isVideo = /play2|playvid/i.test(command);
 
     const caption = `
 ╭─〔 ♆ *Uᴄʜɪʜᴀ Pʟᴀʏᴇʀ* ♆ 〕─╮
@@ -36,31 +36,36 @@ const handler = async (m, { conn, text, command, usedPrefix }) => {
 
     await conn.sendFile(m.chat, thumbnail, "thumb.jpg", caption, m);
 
-    const isVideo = /play2|playvid/i.test(command);
     let dlUrl = null;
 
+    // 2. Intento con API Vreden (Ruta Directa de Play)
     try {
       const type = isVideo ? "video" : "audio";
-      const apiVreden = await fetch(`https://api.vreden.my.id/api/v1/download/youtube/${type}?url=${encodeURIComponent(urlToUse)}&quality=${isVideo ? "360" : "128"}`);
+      // Usamos el endpoint /play/ que es más directo si la URL falla
+      const apiVreden = await fetch(`https://api.vreden.my.id/api/v1/download/play/${type}?query=${encodeURIComponent(text)}`);
       const resVreden = await apiVreden.json();
       
-      if (resVreden.status && resVreden.result?.download?.url && resVreden.result.download.status !== false) {
+      if (resVreden.status && resVreden.result?.download?.url) {
         dlUrl = resVreden.result.download.url;
       }
-    } catch {
-      dlUrl = null;
+    } catch (e) {
+      console.log("Error en Vreden Principal");
     }
 
+    // 3. Backup: API Agatz (Si la anterior falla)
     if (!dlUrl) {
-      const apiBackup = await fetch(`https://api.agatz.xyz/api/yt${isVideo ? "mp4" : "mp3"}?url=${encodeURIComponent(urlToUse)}`);
-      const resBackup = await apiBackup.json();
-      if (resBackup.status === 200 || resBackup.status === true) {
+      try {
+        const apiBackup = await fetch(`https://api.agatz.xyz/api/yt${isVideo ? "mp4" : "mp3"}?url=${encodeURIComponent(urlToUse)}`);
+        const resBackup = await apiBackup.json();
         dlUrl = resBackup.data?.url || resBackup.result;
+      } catch (e) {
+        console.log("Error en Backup Agatz");
       }
     }
 
-    if (!dlUrl) throw new Error("Todas las fuentes de energía han fallado.");
+    if (!dlUrl || typeof dlUrl !== 'string') throw new Error("Todas las fuentes de energía han fallado.");
 
+    // 4. Envío del archivo
     if (isVideo) {
       await conn.sendMessage(m.chat, {
         video: { url: dlUrl },
