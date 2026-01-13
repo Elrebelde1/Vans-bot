@@ -1,28 +1,20 @@
 import yts from "yt-search";
 import fetch from "node-fetch";
 
-const limit = 100; // MB
-
 const handler = async (m, { conn, text, command, usedPrefix }) => {
   if (!text || !text.trim()) {
-    return m.reply(`🦅 *¿Qᴜᴇ ʙᴜsᴄᴀs ᴇɴ ʟᴀ ᴏsᴄᴜʀɪᴅᴀᴅ?*\n\nUsᴏ ᴄᴏʀʀᴇᴄᴛᴏ:\n${usedPrefix + command} <ɴᴏᴍʙʀᴇ ᴏ URL>\n\nEx: ${usedPrefix + command} Sᴀsᴜᴋᴇ vs Iᴛᴀᴄʜɪ`);
+    return m.reply(`🦅 *¿Qᴜᴇ ʙᴜsᴄᴀs ᴇɴ ʟᴀ ᴏsᴄᴜʀɪᴅᴀᴅ?*\n\nUsᴏ ᴄᴏʀʀᴇᴄᴛᴏ:\n${usedPrefix + command} <ɴᴏᴍʙʀᴇ ᴏ URL>\n\nEx: ${usedPrefix + command} Ace of Base Happy Nation`);
   }
 
-  await m.react("👁️"); // Sharingan inicial
+  await m.react("👁️"); // Reacción de inicio
 
   try {
-    const isUrl = text.includes("youtube.com") || text.includes("youtu.be");
-    let video;
-    
-    if (isUrl) {
-      const res = await yts(text.trim());
-      video = res.videos[0];
-    } else {
-      const res = await yts(text.trim());
-      if (!res || !res.all || res.all.length === 0) {
-        return m.reply("🌑 *Mis ojos no ven nada con ese nombre. Intenta de nuevo.*");
-      }
-      video = res.all[0];
+    // Buscar el video en YouTube
+    const search = await yts(text);
+    const video = search.videos[0];
+
+    if (!video) {
+      return m.reply("🌑 *Mis ojos no ven nada con ese nombre. Intenta de nuevo.*");
     }
 
     const urlToUse = video.url;
@@ -39,62 +31,55 @@ const handler = async (m, { conn, text, command, usedPrefix }) => {
 │
 ╰─────────────────────╯
 
-🌑 *Eʟ ᴘᴏᴅᴇʀ sᴇ ᴇsᴛᴀ ᴄᴀɴᴀʟɪᴢᴀɴᴅᴏ...*
-`.trim();
+🌑 *Eʟ ᴘᴏᴅᴇʀ sᴇ ᴇsᴛᴀ ᴄᴀɴᴀʟɪᴢᴀɴᴅᴏ...*`.trim();
 
+    // Enviar miniatura e info
     await conn.sendFile(m.chat, thumbnail, "thumb.jpg", caption, m);
 
-    // LÓGICA PARA AUDIO (PLAY)
-    if (command === "play") {
-      const apiRes = await fetch(`https://api.vreden.my.id/api/v1/download/youtube/audio?url=${encodeURIComponent(urlToUse)}&quality=128`);
-      const json = await apiRes.json();
-      
-      // Verificamos el estado según la estructura de tu API
-      if (!json.status || !json.result.download.url) {
-        return m.reply("💢 *Fᴀʟʟᴏ ᴇʟ Jᴜᴛsᴜ ᴅᴇ Aᴜᴅɪᴏ. Lᴀ API ɴᴏ ʀᴇsᴘᴏɴᴅɪᴏ.*");
-      }
+    // Determinar si es audio o video
+    const isVideo = command === "play2" || command === "playvid";
+    const type = isVideo ? "video" : "audio";
+    const quality = isVideo ? "360" : "128"; // Calidades estándar para evitar errores de peso
 
-      const dl = json.result.download.url;
+    // Llamada a la API
+    const apiRes = await fetch(`https://api.vreden.my.id/api/v1/download/youtube/${type}?url=${encodeURIComponent(urlToUse)}&quality=${quality}`);
+    const json = await apiRes.json();
 
-      await conn.sendMessage(m.chat, {
-        audio: { url: dl },
-        mimetype: "audio/mpeg",
-        fileName: `${title}.mp3`
-      }, { quoted: m });
-
-      await m.react("🎧");
+    // VALIDACIÓN CRÍTICA: La API puede responder 200 pero traer error en el 'result'
+    if (!json.status || !json.result || !json.result.download || !json.result.download.url) {
+      const errorMsg = json.result?.download?.message || "Error desconocido en el servidor";
+      return m.reply(`💢 *Fᴀʟʟᴏ ᴇʟ Jᴜᴛsᴜ:* ${errorMsg}`);
     }
 
-    // LÓGICA PARA VIDEO (PLAY2 / PLAYVID)
-    if (command === "play2" || command === "playvid") {
-      // Usando la misma lógica de API para video
-      const apiRes = await fetch(`https://api.vreden.my.id/api/v1/download/youtube/video?url=${encodeURIComponent(urlToUse)}&quality=720`);
-      const json = await apiRes.json();
+    const dlUrl = json.result.download.url;
 
-      if (!json.status || !json.result.download.url) {
-        return m.reply("💢 *Lᴀ ᴏsᴄᴜʀɪᴅᴀᴅ ɴᴏ ᴘᴜᴅᴏ ᴍᴏsᴛʀᴀʀ ᴇʟ ᴠɪᴅᴇᴏ.*");
-      }
-
-      const dl = json.result.download.url;
-
+    if (isVideo) {
+      // Enviar Video
       await conn.sendMessage(m.chat, {
-        video: { url: dl },
+        video: { url: dlUrl },
         mimetype: "video/mp4",
         fileName: `${title}.mp4`,
         caption: `⚡ *Aϙᴜɪ ᴛɪᴇɴᴇs ᴛᴜ ᴅᴇsᴛɪɴᴏ.*`
       }, { quoted: m });
-
       await m.react("🦅");
+    } else {
+      // Enviar Audio
+      await conn.sendMessage(m.chat, {
+        audio: { url: dlUrl },
+        mimetype: "audio/mpeg",
+        fileName: `${title}.mp3`
+      }, { quoted: m });
+      await m.react("🎧");
     }
 
   } catch (error) {
-    console.error("❌ Error:", error);
+    console.error(error);
     m.reply("⚠️ *💢 Mɪs ᴏᴊᴏs ʜᴀɴ sɪᴅᴏ ʙʟᴏϙᴜᴇᴀᴅᴏs. Oᴄᴜʀʀɪᴏ ᴜɴ ᴇʀʀᴏʀ ᴇɴ ᴇʟ Jᴜᴛsᴜ.*");
   }
 };
 
 handler.help = ["play", "play2", "playvid"];
-handler.tags = ["descargas", "youtube"];
-handler.command = ["play", "play2", "playvid"];
+handler.tags = ["descargas"];
+handler.command = /^(play|play2|playvid)$/i;
 
 export default handler;
