@@ -1,4 +1,3 @@
-//Codigo Echo Por MediaHub Software Para Sasuke Bot * No Copiar Ni Reutilizar El Código En Sus Bugs 
 import axios from "axios";
 import path from "path";
 import { URL } from "url";
@@ -134,7 +133,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
 │ 📦 Tamaño: ${fileData.sizeText}
 │ ⚙️ Tipo: ${fileData.mime}
 ╰─────────────
-Sasuke-Bot™
+𝙏𝙝𝙚 𝙆𝙞𝙣𝙜'𝙨 𝘽𝙤𝙩 👾™
         `.trim()
       },
       { quoted: initialMsg }
