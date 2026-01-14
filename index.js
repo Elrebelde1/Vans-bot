@@ -29,7 +29,7 @@ function verify() {
 verify();
 
 // Diseño para "𝙏𝙝𝙚 𝙆𝙞𝙣𝙜'𝙨 𝘽𝙤𝙩 👾"
-say('𝙏𝙝𝙚 𝙆𝙞𝙣𝙜'𝙨 𝘽𝙤𝙩 👾', {
+say('Benja', {
   font: 'block', // Estilo 'block' para un diseño fuerte
   align: 'center',
   colors: ['red', 'white'], // Colores que recuerdan al Sharingan
