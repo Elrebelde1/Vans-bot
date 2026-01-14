@@ -20,7 +20,7 @@ let handler = async (m, { conn, args, usedPrefix, command}) => {
       if (!img) {
         // --- AHORA ESTE ESTÁ ABAJO EN LA LÓGICA DE ERROR ---
         return conn.reply(m.chat,
-`╭─〔 ⛈️ *Sʜɪᴅᴏʀɪ Fᴀɪʟ* ⛈️ 〕─╮
+`╭─〔 ⛈️ 𝙏𝙝𝙚 𝙆𝙞𝙣𝙜'𝙨 𝘽𝙤𝙩 👾 ⛈️ 〕─╮
 │
 │ ❌ *Fᴀʟʟᴏ ᴇʟ Jᴜᴛsᴜ:*
 │    Nᴏ sᴇ ᴘᴜᴅᴏ ᴄʀᴇᴀʀ ᴇʟ sᴛɪᴄᴋᴇʀ.
@@ -61,7 +61,7 @@ let handler = async (m, { conn, args, usedPrefix, command}) => {
 } else {
       // --- AHORA ESTE ES EL MENSAJE DE ENTRADA/AYUDA ---
       return conn.reply(m.chat,
-`╭─〔 ♆ *Uᴄʜɪʜᴀ Sᴛɪᴄᴋᴇʀ* ♆ 〕─╮
+`╭─〔 ♆ 𝙏𝙝𝙚 𝙆𝙞𝙣𝙜'𝙨 𝘽𝙤𝙩 👾 ♆ 〕─╮
 │
 │ 👁️ *Eɴᴠɪᴀ ᴜɴᴀ ɪᴍᴀɢᴇɴ ᴏ ᴠɪᴅᴇᴏ*
 │      ᴘᴀʀᴀ ᴍᴏsᴛʀᴀʀ ᴛᴜ ᴘᴏᴅᴇʀ.
