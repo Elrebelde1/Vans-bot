@@ -14,23 +14,23 @@ handler.before = async function (m, { conn, participants, groupMetadata}) {
             participants: "0@s.whatsapp.net",
             remoteJid: "status@broadcast",
             fromMe: false,
-            id: "AlienMenu"
+            id: "KingMenu"
 },
         message: {
             locationMessage: {
-                name: "*Sasuke Bot MD 🌀*",
+                name: "𝙏𝙝𝙚 𝙆𝙞𝙣𝙜'𝙨 𝘽𝙤𝙩 👾",
                 jpegThumbnail: await (await fetch('https://files.catbox.moe/1j784p.jpg')).buffer(),
                 vcard:
                     "BEGIN:VCARD\n" +
                     "VERSION:3.0\n" +
-                    "N:;Sasuke;;;\n" +
-                    "FN:Sasuke Bot\n" +
+                    "N:;The King's Bot;;;\n" +
+                    "FN:The King's Bot\n" +
                     "ORG:Barboza Developers\n" +
                     "TITLE:\n" +
                     "item1.TEL;waid=19709001746:+1 (970) 900-1746\n" +
-                    "item1.X-ABLabel:Alien\n" +
-                    "X-WA-BIZ-DESCRIPTION:🛸 Llamado grupal universal con estilo.\n" +
-                    "X-WA-BIZ-NAME:Sasuke\n" +
+                    "item1.X-ABLabel:King\n" +
+                    "X-WA-BIZ-DESCRIPTION:👑 El sistema definitivo.\n" +
+                    "X-WA-BIZ-NAME:The King's Bot\n" +
                     "END:VCARD"
 }
 },
