@@ -3,37 +3,39 @@ import axios from 'axios'
 
 let handler = async (m, { conn, args}) => {
   if (!args[0]) throw `
-╭─❍ *⚔️ RETO 8 VS 8 ⚔️*
-│
-│⏳ *Horario:*
-│🇲🇽 MÉXICO:
-│🇨🇴 COLOMBIA:
-│
-│🎮 *Modalidad:*
-│👥 *Jugadores:*
-│
-│🏆 *Escuadra 1:*
-│   👑 •
-│   🥷🏻 •
-│   🥷🏻 •
-│   🥷🏻 •
-│
-│🏆 *Escuadra 2:*
-│   👑 •
-│   🥷🏻 •
-│   🥷🏻 •
-│   🥷🏻 •
-│
-│🔄 *Suplentes:*
-│   🥷🏻 •
-│   🥷🏻 •
-╰────────────────❍
+╭━━━〔 ⚔️ *KING'S VERSUS* ⚔️ 〕━━━┓
+┃
+┃ ⏳ *HORARIO:*
+┃ 🇲🇽 MÉXICO: 
+┃ 🇨🇴 COLOMBIA: 
+┃
+┃ 🎮 *MODALIDAD:*
+┃ 👥 *JUGADORES:* 8 VS 8
+┃
+┃ 🏆 *ESCUADRA A:*
+┃    👑 • 
+┃    ⚡ • 
+┃    ⚡ • 
+┃    ⚡ • 
+┃
+┃ 🏆 *ESCUADRA B:*
+┃    👑 • 
+┃    ⚡ • 
+┃    ⚡ • 
+┃    ⚡ • 
+┃
+┃ 🔄 *RESERVAS:*
+┃    👤 • 
+┃    👤 • 
+┃
+┃ 💬 *Usa:* .8vs8 [hora]
+┗━━━━━━━━━━━━━━━━━━━━━━━┛
 `
 
   const textos = [
-    "🔥 𝘋𝘶𝘦𝘭𝘰 𝘎𝘳𝘶𝘱𝘢𝘭 𝘈𝘤𝘵𝘪𝘷𝘢𝘥𝘰",
-    "⚡ 𝘙𝘦𝘵𝘰 𝘊𝘭𝘢𝘯 𝘝𝘴 𝘊𝘭𝘢𝘯",
-    "🛡️ 𝘊𝘰𝘮𝘣𝘢𝘵𝘦 𝘋𝘦𝘧𝘪𝘯𝘪𝘵𝘪𝘷𝘰 8𝘹8"
+    "👑 𝙏𝙝𝙚 𝙆𝙞𝙣𝙜'𝙨 𝘽𝙤𝙩: 𝘿𝙤𝙢𝙞𝙣𝙞𝙤 𝙏𝙤𝙩𝙖𝙡",
+    "⚔️ 𝘿𝙪𝙚𝙡𝙤 𝙙𝙚 𝙍𝙚𝙮𝙚𝙨 𝘼𝙘𝙩𝙞𝙫𝙖𝙙𝙤",
+    "👾 𝙎𝙮𝙨𝙩𝙚𝙢 𝙆𝙞𝙣𝙜: 𝘾𝙤𝙣𝙛lict𝙤 8𝙫𝙨8"
   ]
   const imagenes = [
     "https://iili.io/FKVDVAN.jpg",
@@ -45,56 +47,60 @@ let handler = async (m, { conn, args}) => {
   const imagen = imagenes[Math.floor(Math.random() * imagenes.length)]
   const thumbBuffer = Buffer.from(
     (await axios.get(imagen, { responseType: 'arraybuffer'})).data
-)
+  )
 
-  const izumi = {
+  const kingMessage = {
     key: {
       fromMe: false,
       participant: "0@s.whatsapp.net",
       remoteJid: "status@broadcast"
-},
+    },
     message: {
       orderMessage: {
-        itemCount: 8,
+        itemCount: 2024,
         message: titulo,
-        footerText: "Sasuke Bot MD",
+        footerText: "𝙏𝙝𝙚 𝙆𝙞𝙣𝙜'𝙨 𝘽𝙤𝙩 👾",
         thumbnail: thumbBuffer,
         surface: 2,
         sellerJid: "0@s.whatsapp.net"
-}
-}
-}
+      }
+    }
+  }
+
+  const caption = `
+┏━━━━〔 👑 *KING'S 8 VS 8* 👑 〕━━━┓
+┃
+┃ ⏳ *HORARIOS:*
+┃ 🇲🇽 MÉXICO: ${args[0]}
+┃ 🇨🇴 COLOMBIA: ${args[0]}
+┃
+┃ 🎮 *MODALIDAD:*
+┃ 👥 *JUGADORES:* 8 VS 8
+┃
+┃ 🔱 *ESCUADRA 1:*
+┃    👑 • 
+┃    ⚔️ • 
+┃    ⚔️ • 
+┃    ⚔️ • 
+┃
+┃ 🔱 *ESCUADRA 2:*
+┃    👑 • 
+┃    ⚔️ • 
+┃    ⚔️ • 
+┃    ⚔️ • 
+┃
+┃ 🚀 *SUPLENTES:*
+┃    👾 • 
+┃    👾 • 
+┃
+┃ > ⚡ 𝙏𝙝𝙚 𝙆𝙞𝙣𝙜'𝙨 𝘽𝙤𝙩 👾
+┗━━━━━━━━━━━━━━━━━━━━━━━┛`.trim()
 
   await conn.sendMessage(m.chat, {
     image: { url: 'https://cdn.russellxz.click/16b3faeb.jpeg'},
-    caption:
-`╭─❍ *⚔️ 8 VS 8 | RETO SASUKE ⚔️*
-│
-│⏳ *Horario:*
-│🇲🇽 MÉXICO: ${args[0]}
-│🇨🇴 COLOMBIA: ${args[0]}
-│
-│🎮 *Modalidad:*
-│👥 *Jugadores:*
-│
-│🏆 *Escuadra 1:*
-│   👑 •
-│   🥷🏻 •
-│   🥷🏻 •
-│   🥷🏻 •
-│
-│🏆 *Escuadra 2:*
-│   👑 •
-│   🥷🏻 •
-│   🥷🏻 •
-│   🥷🏻 •
-│
-│🔄 *Suplentes:*
-│   🥷🏻 •
-│   🥷🏻 •
-╰────────────────❍`,
+    caption: caption,
     mentions: []
-}, { quoted: izumi})
+  }, { quoted: kingMessage })
 }
 
 handler.help = ['8vs8']
