@@ -7,7 +7,7 @@ let handler = async (m, { text, command }) => {
 
   try {
     // Construimos la URL con el texto y el prompt fijo
-    const prompt = "Eres Sasuke, fuiste creado por Barboza"
+    const prompt = "Eres 𝙏𝙝𝙚 𝙆𝙞𝙣𝙜'𝙨 𝘽𝙤𝙩 👾, fuiste creado por Benja"
     const url = `https://api.delirius.store/ia/gptprompt?text=${encodeURIComponent(text.trim())}&prompt=${encodeURIComponent(prompt)}`
     
     const res = await fetch(url)
@@ -18,7 +18,7 @@ let handler = async (m, { text, command }) => {
     }
 
     // Mensaje final con identidad y creador
-    const resultMessage = `🤖 *Sasuke bot responde:*\n\n${json.data}\n\n👤 *Creador:* ${json.creator}`
+    const resultMessage = `🤖 *𝙏𝙝𝙚 𝙆𝙞𝙣𝙜'𝙨 𝘽𝙤𝙩 👾 responde:*\n\n${json.data}\n\n👤 *Creador:* ${json.creator}`
 
     await m.reply(resultMessage)
 
