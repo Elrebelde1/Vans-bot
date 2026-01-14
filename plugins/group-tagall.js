@@ -1,82 +1,69 @@
 import fetch from "node-fetch";
 
-const handler = async (m, { isOwner, isAdmin, conn, text, participants, args}) => {
-  const chat = global.db.data.chats[m.chat] || {};
-  const emoji = chat.emojiTag || '👑';
-
+const handler = async (m, { isOwner, isAdmin, conn, text, participants, args }) => {
+  // Verificación estricta de permisos
   if (!(isAdmin || isOwner)) {
     global.dfail('admin', m, conn);
-    throw new Error('No tienes permisos para usar este comando.');
+    return; // Detiene la ejecución
   }
 
+  const chat = global.db.data.chats[m.chat] || {};
+  const emoji = chat.emojiTag || '👑';
   const customMessage = args.join(' ');
   const groupMetadata = await conn.groupMetadata(m.chat);
   const groupName = groupMetadata.subject;
 
+  // Mapa de banderas optimizado
   const countryFlags = {
-    '1': '🇺🇸', '44': '🇬🇧', '33': '🇫🇷', '49': '🇩🇪', '39': '🇮🇹', '81': '🇯🇵',
-    '82': '🇰🇷', '86': '🇨🇳', '7': '🇷🇺', '91': '🇮🇳', '61': '🇦🇺', '64': '🇳🇿',
-    '34': '🇪🇸', '55': '🇧🇷', '52': '🇲🇽', '54': '🇦🇷', '57': '🇨🇴', '51': '🇵🇪',
-    '56': '🇨🇱', '58': '🇻🇪', '502': '🇬🇹', '503': '🇸🇻', '504': '🇭🇳', '505': '🇳🇮',
-    '506': '🇨🇷', '507': '🇵🇦', '591': '🇧🇴', '592': '🇬🇾', '593': '🇪🇨', '595': '🇵🇾',
-    '596': '🇲🇶', '597': '🇸🇷', '598': '🇺🇾', '53': '🇨🇺', '20': '🇪🇬', '972': '🇮🇱',
-    '90': '🇹🇷', '63': '🇵🇭', '62': '🇮🇩', '60': '🇲🇾', '65': '🇸🇬', '66': '🇹🇭',
-    '31': '🇳🇱', '32': '🇧🇪', '30': '🇬🇷', '36': '🇭🇺', '46': '🇸🇪', '47': '🇳🇴',
-    '48': '🇵🇱', '421': '🇸🇰', '420': '🇨🇿', '40': '🇷🇴', '43': '🇦🇹', '373': '🇲僧'
+    '1': '🇺🇸', '44': '🇬🇧', '33': '🇫🇷', '49': '🇩🇪', '34': '🇪🇸', '55': '🇧🇷', 
+    '52': '🇲🇽', '54': '🇦🇷', '57': '🇨🇴', '51': '🇵🇪', '56': '🇨🇱', '58': '🇻🇪', 
+    '502': '🇬🇹', '503': '🇸🇻', '504': '🇭🇳', '505': '🇳🇮', '506': '🇨🇷', '507': '🇵🇦', 
+    '591': '🇧🇴', '593': '🇪🇨', '595': '🇵🇾', '598': '🇺🇾', '53': '🇨🇺'
   };
 
   const getCountryFlag = (id) => {
-    const phoneNumber = id.split('@')[0];
-    if (phoneNumber.startsWith('1')) return '🇺🇸';
-    let prefix = phoneNumber.substring(0, 3);
-    if (!countryFlags[prefix]) {
-      prefix = phoneNumber.substring(0, 2);
-    }
-    return countryFlags[prefix] || '👤';
+    const num = id.split('@')[0];
+    if (num.startsWith('1')) return '🇺🇸';
+    const p2 = num.substring(0, 2);
+    const p3 = num.substring(0, 3);
+    return countryFlags[p3] || countryFlags[p2] || '👤';
   };
 
-  // --- NUEVO DISEÑO ---
-  let messageText = `👑 *LLAMADO REAL DEL GRUPO* 👑\n\n`;
-  messageText += `🏰 *Grupo:* _${groupName}_\n`;
-  messageText += `👥 *Súbditos:* _${participants.length}_\n`;
-  if (customMessage) messageText += `📢 *Mensaje:* ${customMessage}\n`;
-  messageText += `\n┏━━━━━━━━━━━━━━━━━━┓\n`;
+  // --- DISEÑO MEJORADO ---
+  let messageText = `╔══✦ *CONVOCATORIA REAL* ✦══╗\n║\n`;
+  messageText += `║ 🏰 *Grupo:* ${groupName}\n`;
+  messageText += `║ 👥 *Súbditos:* ${participants.length}\n`;
   
-  for (const mem of participants) {
-    messageText += `┃ ${emoji} ${getCountryFlag(mem.id)} @${mem.id.split('@')[0]}\n`;
+  if (customMessage) {
+    messageText += `║ 📢 *Mensaje:* ${customMessage}\n`;
   }
   
-  messageText += `┗━━━━━━━━━━━━━━━━━━┛\n\n`;
-  messageText += `> ⚡ *𝙏𝙝𝙚 𝙆𝙞𝙣𝙜'𝙨 𝘽𝙤𝙩 👾*`;
+  messageText += `║\n╠══✦ *LISTA DE MIEMBROS* ✦══\n║\n`;
+
+  for (const mem of participants) {
+    messageText += `║ ${emoji} ${getCountryFlag(mem.id)} @${mem.id.split('@')[0]}\n`;
+  }
+
+  messageText += `║\n╚══✦ 𝙏𝙝𝙚 𝙆𝙞𝙣𝙜'𝙨 𝘽𝙤𝙩 👾 ✦══╝`;
 
   const imageUrl = 'https://qu.ax/PVER5';
 
+  // Miniatura para el mensaje (fkontak)
+  const thumb = await (await fetch(imageUrl)).buffer();
+
   const fkontak = {
-    key: {
-      participants: "0@s.whatsapp.net",
-      remoteJid: "status@broadcast",
-      fromMe: false,
-      id: "KingTagall"
+    key: { 
+      participants: "0@s.whatsapp.net", 
+      remoteJid: "status@broadcast", 
+      fromMe: false, 
+      id: "KingTagall" 
     },
     message: {
       locationMessage: {
         name: "𝙏𝙝𝙚 𝙆𝙞𝙣𝙜'𝙨 𝘽𝙤𝙩 👾",
-        jpegThumbnail: await (await fetch('https://qu.ax/PVER5')).buffer(),
-        vcard:
-          "BEGIN:VCARD\n" +
-          "VERSION:3.0\n" +
-          "N:;KingBot;;;\n" +
-          "FN:The King's Bot\n" +
-          "ORG:Barboza Developers\n" +
-          "TITLE:\n" +
-          "item1.TEL;waid=19709001746:+1 (970) 900-1746\n" +
-          "item1.X-ABLabel:👑 King\n" +
-          "X-WA-BIZ-DESCRIPTION:El bot que domina tus grupos.\n" +
-          "X-WA-BIZ-NAME:The King's Bot\n" +
-          "END:VCARD"
+        jpegThumbnail: thumb
       }
-    },
-    participant: "0@s.whatsapp.net"
+    }
   };
 
   await conn.sendMessage(m.chat, {
@@ -89,7 +76,9 @@ const handler = async (m, { isOwner, isAdmin, conn, text, participants, args}) =
 handler.help = ['todos'];
 handler.tags = ['group'];
 handler.command = /^(tagall|invocar|marcar|todos|invocación)$/i;
-handler.admin = false;
+
+// Cambiado a true para que el bot gestione el permiso automáticamente
+handler.admin = true; 
 handler.group = true;
 
 export default handler;
