@@ -28,15 +28,15 @@ function verify() {
 }
 verify();
 
-// Diseño para "Sasuke Bot"
-say('sᥲsᥙkᥱ ᑲ᥆𝗍', {
+// Diseño para "𝙏𝙝𝙚 𝙆𝙞𝙣𝙜'𝙨 𝘽𝙤𝙩 👾"
+say('𝙏𝙝𝙚 𝙆𝙞𝙣𝙜'𝙨 𝘽𝙤𝙩 👾', {
   font: 'block', // Estilo 'block' para un diseño fuerte
   align: 'center',
   colors: ['red', 'white'], // Colores que recuerdan al Sharingan
   background: 'black' // Fondo oscuro para resaltar el texto
 });
 
-say(`Developed By • sᥲsᥙkᥱ ᑲ᥆𝗍 mძ`, {
+say(`Developed By • 𝙏𝙝𝙚 𝙆𝙞𝙣𝙜'𝙨 𝘽𝙤𝙩 👾`, {
   font: 'console',
   align: 'center',
   colors: ['magenta']
