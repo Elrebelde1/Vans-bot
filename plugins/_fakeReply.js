@@ -1,7 +1,7 @@
 import fetch from 'node-fetch'
 
 export async function before(m, { conn }) {
-let name = `𝘾𝙖𝙣𝙖𝙡 𝙉𝙪𝙚𝙫𝙤 𝙂𝙚𝙣𝙩𝙚 𝙈𝙚 𝙎𝙞𝙜𝙪𝙚𝙣`
+let name = `𝙏𝙝𝙚 𝙆𝙞𝙣𝙜'𝙨 𝘽𝙤𝙩 👾`
 /* let imagenes = ["https://raw.githubusercontent.com/WillZek/Storage-CB/main/images/c27c82d09da8.jpg",
 "https://raw.githubusercontent.com/WillZek/Storage-CB/main/images/c27c82d09da8.jpg",
 "https://raw.githubusercontent.com/WillZek/Storage-CB/main/images/c27c82d09da8.jpg",
@@ -19,7 +19,7 @@ global.rcanal = {
  contextInfo: {
              isForwarded: true,
     forwardedNewsletterMessageInfo: {
-      newsletterJid: "120363423619689248@newsletter",
+      newsletterJid: "120363405231702659@newsletter",
       serverMessageId: 100,
       newsletterName: name,
    }, 
@@ -69,7 +69,7 @@ global.rcanal = {
     contextInfo: {
             isForwarded: true,
     forwardedNewsletterMessageInfo: {
-      newsletterJid: "120363423619689248@newsletter",
+      newsletterJid: "120363405231702659@newsletter",
       serverMessageId: 100,
       newsletterName: name,
     },
