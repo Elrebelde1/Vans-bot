@@ -2,16 +2,17 @@ import axios from 'axios'
 
 let handler = async (m, { conn, args}) => {
   if (!args[0]) throw `
-╭─❍ *💥 RETO 6 VS 6 💥*
+╭╾━━━━╼ 〔 📋 〕 ╾━━━━╼╮
+│  👟 *𝖁𝖆𝖓𝖘 𝕭𝖔𝖙 𝖱𝖾𝗍𝗈 𝟨𝗏𝗌𝟨*
 │
-│⏳ *Horario:*
-│🇲🇽 MÉXICO:
-│🇨🇴 COLOMBIA:
+│ ⏳ *ʜᴏʀᴀʀɪᴏ:*
+│ 🇲🇽 MÉXICO:
+│ 🇨🇴 COLOMBIA:
 │
-│🎮 *Modalidad:*
-│👥 *Jugadores:*
+│ 🎮 *ᴍᴏᴅᴀʟɪᴅᴀᴅ:*
+│ 👥 *ᴊᴜɢᴀᴅᴏʀᴇs:*
 │
-│🏆 *Escuadra 1:*
+│ 🏆 *ᴇsᴄᴜᴀᴅʀᴀ 1:*
 │   👑 •
 │   🥷🏻 •
 │   🥷🏻 •
@@ -19,16 +20,17 @@ let handler = async (m, { conn, args}) => {
 │   🥷🏻 •
 │   🥷🏻 •
 │
-│🔄 *Suplentes:*
+│ 🔄 *sᴜᴘʟᴇɴᴛᴇs:*
 │   🥷🏻 •
 │   🥷🏻 •
-╰─────────────────❍
+╰╾━━━━╼ 〔 🛸 〕 ╾━━━━╼╯
+*𝖡𝗒 𝖤𝗅𝗂𝗎搬 • 𝖵𝖺𝗇𝗌 𝖡𝗈𝗍*
 `
 
   const mensajes = [
-    "🔥 𝘊𝘖𝘔𝘉𝘈𝘛𝘌 𝘗𝘙𝘌𝘗𝘈𝘙𝘈𝘋𝘖 | 𝘌𝘲𝘶𝘪𝘱𝘰 6𝘟6",
-    "⚡ 𝘙𝘌𝘛𝘖 𝘈𝘊𝘛𝘐𝘝𝘖 | 𝘚𝘦𝘭𝘦𝘤𝘤𝘪ó𝘯 𝘥𝘦 𝘓𝘪𝘥𝘦𝘳𝘦𝘴",
-    "💣 𝘓𝘭𝘢𝘮𝘢𝘥𝘰 𝘎𝘳𝘶𝘱𝘢𝘭 | 𝘌𝘴𝘤𝘶𝘢𝘥𝘳𝘢 𝘎𝘦𝘯𝘦𝘴𝘪𝘴"
+    "🔥 COMBATE PREPARADO | Vans Bot",
+    "⚡ RETO 6vs6 | Eliud System",
+    "💣 LLAMADO GRUPAL | Vans Off The Wall"
   ]
   const imagenes = [
     "https://iili.io/FKVDVAN.jpg",
@@ -43,34 +45,34 @@ let handler = async (m, { conn, args}) => {
   try {
     const res = await axios.get(imagenRandom, { responseType: 'arraybuffer'})
     thumbBuffer = Buffer.from(res.data)
-} catch (err) {
+  } catch (err) {
     console.error("Error al cargar imagen de miniatura:", err)
     thumbBuffer = Buffer.from('')
-}
+  }
 
   const izumi = {
     key: {
       fromMe: false,
       participant: "0@s.whatsapp.net",
       remoteJid: "status@broadcast"
-},
+    },
     message: {
       orderMessage: {
         itemCount: 6,
         message: textoRandom,
-        footerText: "𝙏𝙝𝙚 𝙆𝙞𝙣𝙜'𝙨 𝘽𝙤𝙩",
+        footerText: "𝖵𝖺𝗇𝗌 𝖡𝗈𝗍 • 𝖡𝗒 𝖤𝗅𝗂𝗎𝖽",
         thumbnail: thumbBuffer,
         surface: 2,
         sellerJid: "0@s.whatsapp.net"
-}
-}
-}
+      }
+    }
+  }
 
   await conn.sendMessage(m.chat, {
     image: { url: 'https://cdn.russellxz.click/16b3faeb.jpeg'},
-    caption: `╭─❍ *💥 6 VS 6 | RETO 𝙏𝙝𝙚 𝙆𝙞𝙣𝙜'𝙨 𝘽𝙤𝙩 👾 💥*\n│\n│⏳ *Horario:*\n│🇲🇽 MÉXICO: ${args[0]}\n│🇨🇴 COLOMBIA: ${args[0]}\n│\n│🎮 *Modalidad:*\n│👥 *Jugadores:*\n│\n│🏆 *Escuadra 1:*\n│   👑 • \n│   🥷🏻 • \n│   🥷🏻 • \n│   🥷🏻 • \n│   🥷🏻 • \n│   🥷🏻 • \n│\n│🔄 *Suplentes:*\n│   🥷🏻 • \n│   🥷🏻 • \n╰─────────────────❍`,
+    caption: `╭╾━━━━╼ 〔 👟 〕 ╾━━━━╼╮\n│  💥 *𝟨 𝖵𝖲 𝟨 | 𝖁𝖆𝖓𝖘 𝕭𝖔𝖙*\n│\n│ ⏳ *ʜᴏʀᴀʀɪᴏ:*\n│ 🇲🇽 MÉXICO: ${args[0]}\n│ 🇨🇴 COLOMBIA: ${args[0]}\n│\n│ 🎮 *ᴍᴏᴅᴀʟɪᴅᴀᴅ:*\n│ 👥 *ᴊᴜɢᴀᴅᴏʀᴇs:*\n│\n│ 🏆 *ᴇsᴄᴜᴀᴅʀᴀ 1:*\n│   👑 • \n│   🥷🏻 • \n│   🥷🏻 • \n│   🥷🏻 • \n│   🥷🏻 • \n│   🥷🏻 • \n│\n│ 🔄 *sᴜᴘʟᴇɴᴛᴇs:*\n│   🥷🏻 • \n│   🥷🏻 • \n╰╾━━━━╼ 〔 🛸 〕 ╾━━━━╼╯\n*𝖡𝗒 𝖤𝗅𝗂𝗎𝖽 • 𝖵𝖺𝗇𝗌 𝖡𝗈𝗍*`,
     mentions: []
-}, { quoted: izumi})
+  }, { quoted: izumi})
 }
 
 handler.help = ['6vs6']
