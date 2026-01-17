@@ -26,16 +26,16 @@ let processingGlobal = false;
 const processingChats = new Set();
 
 let handler = async (m, { conn, text, usedPrefix, command }) => {
-  await m.react('📨');
+  await m.react('👟');
 
   try {
     if (processingGlobal || processingChats.has(m.chat)) {
       return await m.reply(
         `
-╭─────────────♂
-│ ⚠️ El sistema ya está procesando un archivo.
-│ ⏳ Intenta nuevamente en unos minutos.
-╰─────────────♂`,
+╭╾━━━━╼ 〔 ⚠️ 〕 ╾━━━━╼╮
+│ 𝖤𝗅 𝗌𝗂𝗌𝗍𝖾𝗆𝖺 𝖾𝗌𝗍𝖺́ 𝗈𝖼𝗎𝗉𝖺𝖽𝗈.
+│ 𝖨𝗇𝗍𝖾𝗇𝗍𝖺 𝖾𝗇 𝗎𝗇𝗈𝗌 𝗆𝗂𝗇𝗎𝗍𝗈𝗌.
+╰╾━━━━╼ 〔 🛸 〕 ╾━━━━╼╯`,
         m
       );
     }
@@ -43,12 +43,12 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
     if (!text?.trim()) {
       return await m.reply(
         `
-╭─────────────♂
-│ 📦 Debes ingresar un enlace válido de MediaFire.
+╭╾━━━━╼ 〔 📦 〕 ╾━━━━╼╮
+│ 𝖣𝖾𝖻𝖾𝗌 𝗂𝗇𝗀𝗋𝖾𝗌𝖺𝗋 𝗎𝗇 𝖾𝗇𝗅𝖺𝖼𝖾.
 │
-│ 💠 Ejemplo:
+│ 👟 *Ejemplo:*
 │ ${usedPrefix + command} https://www.mediafire.com/file/xxxx
-╰─────────────♂`,
+╰╾━━━━╼ 〔 🛸 〕 ╾━━━━╼╯`,
         m
       );
     }
@@ -56,10 +56,9 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
     if (!/https?:\/\/(www\.)?mediafire\.com\//i.test(text)) {
       return await m.reply(
         `
-╭─────────────♂
-│ 🚫 Ese enlace no es de MediaFire.
-│ Ingresa un enlace válido.
-╰─────────────♂`,
+╭╾━━━━╼ 〔 🚫 〕 ╾━━━━╼╮
+│ 𝖤𝗇𝗅𝖺𝖼𝖾 𝗇𝗈 𝗏𝖺́𝗅𝗂𝖽𝗈 𝖽𝖾 𝖬𝖥.
+╰╾━━━━╼ 〔 🛸 〕 ╾━━━━╼╯`,
         m
       );
     }
@@ -67,8 +66,8 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
     processingGlobal = true;
     processingChats.add(m.chat);
 
-    const initialMsg = await m.reply(`🔄 Procesando enlace...\n🛡️ Espera un momento...`);
-    await m.react('🔄');
+    const initialMsg = await m.reply(`🔄 *𝖁𝖆𝖓𝖘 𝕭𝖔𝖙 𝖯𝗋𝗈𝖼𝖾𝗌𝖺𝗇𝖽𝗈...*\n🛡️ 𝖤𝗌𝗉𝖾𝗋𝖺 𝗎𝗇 𝗆𝗈𝗆𝖾𝗇𝗍𝗈...`);
+    await m.react('⏳');
 
     let fileData = null;
 
@@ -83,7 +82,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
           timeout: 20000
         }
       );
-//no usen la Apikey pndjs 🖕🏻
+
       if (data?.status && data.data?.downloadUrl) {
         const r = data.data;
         fileData = {
@@ -128,30 +127,28 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
         fileName: fileData.name,
         mimetype: fileData.mime,
         caption: `
-╭─────────────
-│ 📁 Nombre: ${fileData.name}
-│ 📦 Tamaño: ${fileData.sizeText}
-│ ⚙️ Tipo: ${fileData.mime}
-╰─────────────
-𝙏𝙝𝙚 𝙆𝙞𝙣𝙜'𝙨 𝘽𝙤𝙩 👾™
+╭╾━━━━╼ 〔 🛸 〕 ╾━━━━╼╮
+│ 📁 *ɴᴏᴍʙʀᴇ:* ${fileData.name}
+│ 📦 *ᴛᴀᴍᴀñᴏ:* ${fileData.sizeText}
+│ ⚙️ *ᴛɪᴘᴏ:* ${fileData.mime}
+╰╾━━━━╼ 〔 👟 〕 ╾━━━━╼╯
+*𝖁𝖆𝖓𝖘 𝕭𝖔𝖙 • 𝖡𝗒 𝖤𝗅𝗂𝗎𝖽*
         `.trim()
       },
       { quoted: initialMsg }
     );
 
-    await m.react('🟢');
+    await m.react('✅');
 
   } catch (e) {
-    await m.react('🔴');
+    await m.react('✖️');
 
     await m.reply(
       `
-╭─────────────
-│ ❌ Error al procesar el archivo.
-│
-│ 📋 Detalle:
-│ ${e.message}
-╰─────────────`,
+╭╾━━━━╼ 〔 ❌ 〕 ╾━━━━╼╮
+│ 𝖤𝗋𝗋𝗈𝗋 𝖽𝖾 𝗉𝗋𝗈𝖼𝖾𝗌𝖺𝗆𝗂𝖾𝗇𝗍𝗈.
+│ 𝖣𝖾𝗍𝖺𝗅𝗅𝖾: ${e.message}
+╰╾━━━━╼ 〔 🛸 〕 ╾━━━━╼╯`,
       m
     );
 
