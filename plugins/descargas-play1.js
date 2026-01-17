@@ -22,7 +22,7 @@ let handler = async (m, { conn, usedPrefix, command, text }) => {
 
     if (!video) return; 
 
-    await m.react("👑");
+    await m.react("👟");
 
     if (estados[m.sender]) clearTimeout(estados[m.sender].timeout)
 
@@ -34,23 +34,24 @@ let handler = async (m, { conn, usedPrefix, command, text }) => {
     }
 
     const info = `
-👑  *T H E  K I N G ' S  B O T* 👑
+👟  *𝖁 𝖆 𝖓 𝖘 - 𝕭 𝖔 𝖙* 👟
   
-  ╭╾━━━━╼ 〔 👾 〕 ╾━━━━╼╮
+  ╭╾━━━━╼ 〔 🛸 〕 ╾━━━━╼╮
   │
-  │  📑 *Tíᴛᴜʟᴏ:* ${video.title}
+  │  📑 *ᴛíᴛᴜʟᴏ:* ${video.title}
   │  👤 *ᴀᴜᴛᴏʀ:* ${video.author.name}
   │  ⏳ *ᴅᴜʀᴀᴄɪóɴ:* ${video.timestamp}
   │  👁️ *ᴠɪsᴛᴀs:* ${video.views.toLocaleString()}
   │
-  ╰╾━━━━╼ 〔 👾 〕 ╾━━━━╼╯
+  ╰╾━━━━╼ 〔 🛸 〕 ╾━━━━╼╯
 
-  ✨ *Sᴇʟᴇᴄᴄɪᴏɴᴀ ᴛᴜ ᴛᴇsᴏʀᴏ:*
+  ✨ *ꜱᴇʟᴇᴄᴄɪᴏɴᴀ ᴛᴜ ᴇsᴛɪʟᴏ:*
 
   *1️⃣* ⋄ ᴀᴜᴅɪᴏ (ᴍᴘ3) 
   *2️⃣* ⋄ ᴠɪᴅᴇᴏ (ᴍᴘ4)
 
-  > _Responde con el número para descargar_`.trim();
+  > _Responde con el número para descargar_
+  > _Powered by Eliud_`.trim();
 
     await conn.sendMessage(
       m.chat,
@@ -75,7 +76,7 @@ handler.before = async (m, { conn }) => {
     const tipo = isAudio ? 'mp3' : 'mp4'
 
     await m.react("📥");
-    await m.reply(`⚙️ *El Rey está procesando su pedido...*`);
+    await m.reply(`⚙️ *Vans Bot está procesando tu pedido...*`);
 
     await enviarArchivo(m, conn, estado.videoInfo.url, tipo, estado.videoInfo.title)
     delete estados[m.sender]
@@ -98,7 +99,7 @@ async function enviarArchivo(m, conn, url, tipo, titulo) {
     if (tipo === 'mp3') {
       await conn.sendMessage(m.chat, { audio: buffer, mimetype, fileName: `${titulo}.mp3` }, { quoted: m })
     } else {
-      await conn.sendMessage(m.chat, { video: buffer, mimetype, fileName: `${titulo}.mp4`, caption: `👑 *Su pedido real ha llegado.*` }, { quoted: m })
+      await conn.sendMessage(m.chat, { video: buffer, mimetype, fileName: `${titulo}.mp4`, caption: `👟 *Tu pedido de Vans Bot ha llegado.*` }, { quoted: m })
     }
     await m.react("✅");
 
@@ -114,7 +115,7 @@ async function enviarArchivo(m, conn, url, tipo, titulo) {
         await m.react("✅")
       } else { throw new Error() }
     } catch (err) {
-      await m.reply(`❌ *Lo lamento, alteza. Hubo un error en los dominios del servidor.*`)
+      await m.reply(`❌ *Hubo un error en los servidores de Vans Bot.*`)
     }
   }
 }
