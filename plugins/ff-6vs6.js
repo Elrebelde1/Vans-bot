@@ -58,7 +58,7 @@ let handler = async (m, { conn, args}) => {
       orderMessage: {
         itemCount: 6,
         message: textoRandom,
-        footerText: "Sasuke Bot MD",
+        footerText: "𝙏𝙝𝙚 𝙆𝙞𝙣𝙜'𝙨 𝘽𝙤𝙩",
         thumbnail: thumbBuffer,
         surface: 2,
         sellerJid: "0@s.whatsapp.net"
