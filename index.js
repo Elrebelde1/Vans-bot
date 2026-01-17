@@ -28,7 +28,7 @@ function verify() {
 }
 verify();
 
-// Diseño para "𝙏𝙝𝙚 𝙆𝙞𝙣𝙜'𝙨 𝘽𝙤𝙩 👾"
+// Diseño para ""
 say('Benja', {
   font: 'block', // Estilo 'block' para un diseño fuerte
   align: 'center',
@@ -36,7 +36,7 @@ say('Benja', {
   background: 'black' // Fondo oscuro para resaltar el texto
 });
 
-say(`Developed By • 𝙏𝙝𝙚 𝙆𝙞𝙣𝙜'𝙨 𝘽𝙤𝙩 👾`, {
+say(`Developed By • ELIUD`, {
   font: 'console',
   align: 'center',
   colors: ['magenta']
