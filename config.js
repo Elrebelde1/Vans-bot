@@ -11,6 +11,7 @@ import axios from 'axios'
   global.owner = [
   [ '50671463198', 'eliud OFC', true ],
   [ '5804226480049', 'Ayudante', true ],
+  [ '573245743033', 'Ayudante', true ],
   ]
 //*─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─*
 
