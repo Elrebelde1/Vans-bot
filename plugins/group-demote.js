@@ -1,41 +1,30 @@
-let handler = async (m, { conn, usedPrefix, command, text }) => {
-    let user = null;
+var handler = async (m, { conn, text }) => {
+    let user;
+    let done = '✅';
 
     if (m.quoted) {
         user = m.quoted.sender;
-    } else if (text) {
-     
-        let numberMatch = text.match(/\d+/);
-        if (numberMatch && numberMatch[0].length >= 11 && numberMatch[0].length <= 13) {
-            user = numberMatch[0] + '@s.whatsapp.net';
-        } else {
-            return conn.reply(m.chat, `*🌀 Por favor, responda al mensaje de un aquel usuario que le quitarás admin* .`, m,rcanal);
-        }
     } else if (m.mentionedJid && m.mentionedJid[0]) {
         user = m.mentionedJid[0];
-    } else {
-        return conn.reply(m.chat, `*🌀 Por favor, responda al mensaje de un usuario aquel que le quitaras admin.*`, m,rcanal);
+    } else if (text) {
+        user = text.replace(/[^0-9]/g, '') + '@s.whatsapp.net';
     }
 
-    if (!user) {
-        return conn.reply(m.chat, `*🌀 No se pudo identificar al usuario.*`, m);
-    }
+    if (!user) return conn.reply(m.chat, '*Menciona a alguien, responde a su mensaje o escribe su número pe.*', m);
 
     try {
         await conn.groupParticipantsUpdate(m.chat, [user], 'demote');
-        m.reply(`✅ Usuario degradado con éxito.`);
+        conn.reply(m.chat, `${done} Ya se le quitó el admin pe.`, m);
     } catch (e) {
-        console.error(e);
-        m.reply(`❌ Ha ocurrido un error al intentar degradar al usuario.`);
+        conn.reply(m.chat, '*No se pudo degradar, verifica si sigue en el grupo.*', m);
     }
-};
+}
 
 handler.help = ['demote'];
 handler.tags = ['group'];
-handler.command = ['demote', 'degradar'];
+handler.command = ['demote', 'degradar', 'quitarpija'];
 handler.group = true;
 handler.admin = true;
 handler.botAdmin = true;
-handler.fail = null;
 
 export default handler;
